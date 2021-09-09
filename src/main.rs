@@ -15,6 +15,19 @@ impl Tuple {
     }
 }
 
+impl std::ops::Add for Tuple {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            w: self.w + other.w,
+        }
+    }
+}
+
 fn fp_equal(a: f32, b: f32) -> bool {
     let epsilon = 0.00001;
     f32::abs(a - b) < epsilon
@@ -77,5 +90,12 @@ mod tests {
     fn vector_creates_tuples_with_w0() {
         let v = vector(4.0,-4.0,3.0);
         assert!(tp_equal(v, Tuple {x: 4.0, y: -4.0, z: 3.0, w: 0.0}))
+    }
+
+    #[test]
+    fn adding_two_tuples() {
+        let a1 = Tuple {x: 3.0, y: -2.0, z: 5.0, w: 1.0};
+        let a2 = Tuple {x: -2.0, y: 3.0, z: 1.0, w: 0.0};
+        assert!(tp_equal(a1 + a2, Tuple {x: 1.0, y: 1.0, z: 6.0, w: 1.0}))
     }
 }
