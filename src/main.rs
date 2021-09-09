@@ -53,6 +53,27 @@ impl std::ops::Neg for Tuple {
     }
 }
 
+impl std::ops::Mul<f32> for Tuple {
+    type Output = Self;
+
+    fn mul(self, scalar: f32) -> Self {
+        Self {
+            x: self.x * scalar,
+            y: self.y * scalar,
+            z: self.z * scalar,
+            w: self.w * scalar,
+        }
+    }
+}
+
+impl std::ops::Div<f32> for Tuple {
+    type Output = Self;
+    
+    fn div(self, divisor: f32) -> Tuple {
+        self * (1.0 / divisor)
+    }
+}
+
 fn fp_equal(a: f32, b: f32) -> bool {
     let epsilon = 0.00001;
     f32::abs(a - b) < epsilon
@@ -156,5 +177,23 @@ mod tests {
     fn negating_a_tuple() {
         let a = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
         assert!(tp_equal(-a, Tuple { x: -1.0, y: 2.0, z: -3.0, w: 4.0}))
+    }
+
+    #[test]
+    fn multiplying_a_tuple_by_a_scalar() {
+        let a = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        assert!(tp_equal(a * 3.5, Tuple { x: 3.5, y: -7.0, z: 10.5, w: -14.0}))
+    }
+
+    #[test]
+    fn multiplying_a_tuple_by_a_fraction() {
+        let a = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        assert!(tp_equal(a * 0.5, Tuple { x: 0.5, y: -1.0, z: 1.5, w: -2.0}))
+    }
+
+    #[test]
+    fn dividing_a_tuple_by_a_scalar() {
+        let a = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        assert!(tp_equal(a / 2.0, Tuple { x: 0.5, y: -1.0, z: 1.5, w: -2.0}))
     }
 }
