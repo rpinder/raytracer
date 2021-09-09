@@ -15,18 +15,35 @@ impl Tuple {
     }
 }
 
-fn main() {
-    println!("Hello, world!");
-}
-
 fn fp_equal(a: f32, b: f32) -> bool {
     let epsilon = 0.00001;
     f32::abs(a - b) < epsilon
 }
 
+fn tp_equal(a: Tuple, b: Tuple) -> bool {
+    for (i, j) in [(a.x, b.x), (a.y, b.y), (a.z, b.z), (a.w, b.w)] {
+        if !fp_equal(i, j) {
+            return false
+        }
+    }
+    true
+}
+
+fn point(a: f32, b: f32, c: f32) -> Tuple {
+    Tuple { x: a, y: b, z: c, w: 1.0 }
+}
+
+fn vector(a: f32, b: f32, c: f32) -> Tuple {
+    Tuple { x: a, y: b, z: c, w: 0.0}
+}
+
+fn main() {
+    println!("Hello, world!");
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{Tuple, fp_equal};
+    use crate::*;
 
     #[test]
     fn tuple_with_w1_is_a_point() {
@@ -48,5 +65,17 @@ mod tests {
         assert!(fp_equal(a.w, 0.0));
         assert!(!a.is_point());
         assert!(a.is_vector());
+    }
+
+    #[test]
+    fn point_creates_tuples_with_w1() {
+        let p = point(4.0,-4.0,3.0);
+        assert!(tp_equal(p, Tuple {x: 4.0, y: -4.0, z: 3.0, w: 1.0}))
+    }
+
+    #[test]
+    fn vector_creates_tuples_with_w0() {
+        let v = vector(4.0,-4.0,3.0);
+        assert!(tp_equal(v, Tuple {x: 4.0, y: -4.0, z: 3.0, w: 0.0}))
     }
 }
