@@ -28,6 +28,19 @@ impl std::ops::Add for Tuple {
     }
 }
 
+impl std::ops::Sub for Tuple {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
 fn fp_equal(a: f32, b: f32) -> bool {
     let epsilon = 0.00001;
     f32::abs(a - b) < epsilon
@@ -97,5 +110,26 @@ mod tests {
         let a1 = Tuple {x: 3.0, y: -2.0, z: 5.0, w: 1.0};
         let a2 = Tuple {x: -2.0, y: 3.0, z: 1.0, w: 0.0};
         assert!(tp_equal(a1 + a2, Tuple {x: 1.0, y: 1.0, z: 6.0, w: 1.0}))
+    }
+
+    #[test]
+    fn subtracting_two_points() {
+        let p1 = point(3.0, 2.0, 1.0);
+        let p2 = point(5.0, 6.0, 7.0);
+        assert!(tp_equal(p1 - p2, vector(-2.0, -4.0, -6.0)))
+    }
+
+    #[test]
+    fn subtracting_a_vector_from_a_point() {
+        let p = point(3.0, 2.0, 1.0);
+        let v = vector(5.0, 6.0, 7.0);
+        assert!(tp_equal(p - v, point(-2.0, -4.0, -6.0)))
+    }
+
+    #[test]
+    fn subtracting_two_vectors() {
+        let v1 = vector(3.0, 2.0, 1.0);
+        let v2 = vector(5.0, 6.0, 7.0);
+        assert!(tp_equal(v1 - v2, vector(-2.0, -4.0, -6.0)))
     }
 }
