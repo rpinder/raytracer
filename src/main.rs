@@ -21,6 +21,28 @@ impl Tuple {
         }
         total.sqrt()
     }
+
+    pub fn normalize(&self) -> Tuple {
+        let mag = self.magnitude();
+        Tuple {
+            x: self.x / mag,
+            y: self.y / mag,
+            z: self.z / mag,
+            w: self.w / mag,
+        }
+    }
+
+    pub fn dot(&self, other: &Tuple) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+    }
+
+    pub fn cross(&self, other: &Tuple) -> Tuple {
+        vector(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+    }
 }
 
 impl std::ops::Add for Tuple {
@@ -339,6 +361,40 @@ mod tests {
     fn magnitude_of_1_2_3_negate_vector() {
         let v = vector(-1.0, -2.0, -3.0);
         assert!(fp_equal(v.magnitude(), (14.0_f32).sqrt()))
+    }
+
+    #[test]
+    fn normalizing_vector_4_0_0_gives_1_0_0() {
+        let v = vector(4.0,0.0,0.0);
+        assert!(tp_equal(v.normalize(), vector(1.0,0.0,0.0)))
+    }
+
+    #[test]
+    fn normalizing_vector_1_2_3() {
+        let v = vector(1.0,2.0,3.0);
+        let rt14 = 14.0_f32.sqrt();
+        assert!(tp_equal(v.normalize(), vector(1.0/rt14, 2.0/rt14, 3.0/rt14)))
+    }
+
+    #[test]
+    fn the_magnitude_of_a_normalized_vector() {
+        let v = vector(1.0,2.0,3.0);
+        assert!(fp_equal(v.normalize().magnitude(), 1.0))
+    }
+
+    #[test]
+    fn dot_product_of_two_tuples() {
+        let a = vector(1.0, 2.0, 3.0);
+        let b = vector(2.0, 3.0, 4.0);
+        assert!(fp_equal(a.dot(&b), 20.0))
+    }
+
+    #[test]
+    fn cross_product_of_two_vectors() {
+        let a = vector(1.0, 2.0, 3.0);
+        let b = vector(2.0, 3.0, 4.0);
+        assert!(tp_equal(a.cross(&b), vector(-1.0, 2.0, -1.0)));
+        assert!(tp_equal(b.cross(&a), vector(1.0, -2.0, 1.0)))
     }
 
 }
