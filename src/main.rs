@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 struct Tuple {
     x: f32,
     y: f32,
@@ -136,8 +137,97 @@ fn vector(a: f32, b: f32, c: f32) -> Tuple {
     }
 }
 
+struct Color {
+    red: f32,
+    green: f32,
+    blue: f32,
+}
+
+impl Color {
+    pub fn new(r: f32, g: f32, b: f32) -> Color {
+        Color {
+            red: r,
+            green: g,
+            blue: b,
+        }
+    }
+
+    pub fn equal(a: Color, b: Color) -> bool {
+        for (i, j) in [(a.red, b.red), (a.green, b.green), (a.blue, b.blue)] {
+            if !fp_equal(i, j) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+impl std::ops::Add for Color {
+    type Output = Color;
+
+    fn add(self, other: Color) -> Color {
+        Color::new(
+            self.red + other.red,
+            self.green + other.green,
+            self.blue + other.blue
+        )
+    }
+}
+
+impl std::ops::Sub for Color {
+    type Output = Color;
+
+    fn sub(self, other: Color) -> Color {
+        Color::new(
+            self.red - other.red,
+            self.green - other.green,
+            self.blue - other.blue
+        )
+    }
+}
+
+impl std::ops::Mul<f32> for Color {
+    type Output = Color;
+
+    fn mul(self, other: f32) -> Color {
+        Color::new(
+            self.red * other,
+            self.green * other,
+            self.blue * other
+        )
+    }
+}
+
+impl std::ops::Mul<Color> for Color {
+    type Output = Color;
+
+    fn mul(self, other: Color) -> Color {
+        Color::new(
+            self.red * other.red,
+            self.green * other.green,
+            self.blue * other.blue
+        )
+    }
+}
+
 fn main() {
     println!("Hello, world!");
+}
+
+struct Projectile {
+    position: Tuple,
+    velocity: Tuple,
+}
+
+struct Environment {
+    gravity: Tuple,
+    wind: Tuple,
+}
+
+fn tick(env: Environment, proj: Projectile) -> Projectile {
+    let pos = proj.position + proj.velocity;
+    let vel = proj.velocity + env.gravity + env.wind;
+    Projectile { position: pos, velocity: vel }
 }
 
 #[cfg(test)]
@@ -354,7 +444,7 @@ mod tests {
     #[test]
     fn magnitude_of_1_2_3_vector() {
         let v = vector(1.0, 2.0, 3.0);
-        assert!(fp_equal(v.magnitude(),  (14.0_f32).sqrt()))
+        assert!(fp_equal(v.magnitude(), (14.0_f32).sqrt()))
     }
 
     #[test]
@@ -365,20 +455,23 @@ mod tests {
 
     #[test]
     fn normalizing_vector_4_0_0_gives_1_0_0() {
-        let v = vector(4.0,0.0,0.0);
-        assert!(tp_equal(v.normalize(), vector(1.0,0.0,0.0)))
+        let v = vector(4.0, 0.0, 0.0);
+        assert!(tp_equal(v.normalize(), vector(1.0, 0.0, 0.0)))
     }
 
     #[test]
     fn normalizing_vector_1_2_3() {
-        let v = vector(1.0,2.0,3.0);
+        let v = vector(1.0, 2.0, 3.0);
         let rt14 = 14.0_f32.sqrt();
-        assert!(tp_equal(v.normalize(), vector(1.0/rt14, 2.0/rt14, 3.0/rt14)))
+        assert!(tp_equal(
+            v.normalize(),
+            vector(1.0 / rt14, 2.0 / rt14, 3.0 / rt14)
+        ))
     }
 
     #[test]
     fn the_magnitude_of_a_normalized_vector() {
-        let v = vector(1.0,2.0,3.0);
+        let v = vector(1.0, 2.0, 3.0);
         assert!(fp_equal(v.normalize().magnitude(), 1.0))
     }
 
@@ -397,4 +490,38 @@ mod tests {
         assert!(tp_equal(b.cross(&a), vector(1.0, -2.0, 1.0)))
     }
 
+    #[test]
+    fn colors_are_rgb_tuples() {
+        let c = Color::new(-0.5, 0.4, 1.7);
+        assert!(fp_equal(c.red, -0.5));
+        assert!(fp_equal(c.green, 0.4));
+        assert!(fp_equal(c.blue, 1.7));
+    }
+
+    #[test]
+    fn adding_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(Color::equal(c1 + c2, Color::new(1.6, 0.7, 1.0)));
+    }
+
+    #[test]
+    fn subtracting_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(Color::equal(c1 - c2, Color::new(0.2, 0.5, 0.5)));
+    }
+
+    #[test]
+    fn multiplying_a_color_by_a_scalar() {
+        let c = Color::new(0.2, 0.3, 0.4);
+        assert!(Color::equal(c * 2.0, Color::new(0.4, 0.6, 0.8)));
+    }
+
+    #[test]
+    fn multiplying_colors() {
+        let c1 = Color::new(1.0, 0.2, 0.4);
+        let c2 = Color::new(0.9, 1.0, 0.1);
+        assert!(Color::equal(c1 * c2, Color::new(0.9, 0.2, 0.04)));
+    }
 }
