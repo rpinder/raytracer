@@ -338,4 +338,24 @@ mod tests {
         c.write_pixel(2, 3, red);
         assert!(Color::equal(c.pixel_at(2, 3), red))
     }
+
+    #[test]
+    fn constructing_the_ppm_header() {
+        let c = Canvas::new(5, 3);
+        let ppm = c.to_ppm();
+        assert!(ppm.lines().collect::<Vec<_>>()[0..3] == vec!("P3", "5 3", "255"))
+    }
+
+    #[test]
+    fn constructing_the_ppm_pixel_data() {
+        let mut c = Canvas::new(5, 3);
+        let c1 = Color::new(1.5, 0.0, 0.0);
+        let c2 = Color::new(0.0, 0.5, 0.0);
+        let c3 = Color::new(-0.5, 0.0, 1.0);
+        c.write_pixel(0, 0, c1);
+        c.write_pixel(2, 1, c2);
+        c.write_pixel(4, 2, c3);
+        let ppm = c.to_ppm();
+        assert!(ppm.lines().collect::<Vec<_>>()[3..6] == vec!("255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"))
+    }
 }

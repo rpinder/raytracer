@@ -17,10 +17,30 @@ impl Canvas {
     }
 
     pub fn pixel_at(&self, x: usize, y: usize) -> Color {
-        self.grid[x][y]
+        self.grid[y][x]
     }
 
     pub fn write_pixel(&mut self, x: usize, y: usize, color: Color) {
-        self.grid[x][y] = color;
+        self.grid[y][x] = color;
+    }
+
+    fn convert(x: f32) -> u32 {
+        let mut val = x * 255.0;
+        if val < 0.0 { val = 0.0 };
+        if val > 255.0 { val = 255.0 };
+        val.round() as u32
+    }
+
+    pub fn to_ppm(self) -> String {
+        let mut str = format!("P3\n{} {}\n255\n", self.width, self.height);
+        for line in self.grid {
+            for pixel in line {
+                let new = format!("{} {} {} ", Self::convert(pixel.red), Self::convert(pixel.green), Self::convert(pixel.blue));
+                str.push_str(&new);
+            }
+            str.pop();
+            str.push_str(&"\n")
+        }
+        str
     }
 }
