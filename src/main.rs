@@ -1,6 +1,7 @@
 use raytracer::color::*;
 use raytracer::utils::*;
 use raytracer::tuple::*;
+use raytracer::canvas::*;
 
 fn main() {
     println!("Hello, world!");
@@ -315,5 +316,26 @@ mod tests {
         let c1 = Color::new(1.0, 0.2, 0.4);
         let c2 = Color::new(0.9, 1.0, 0.1);
         assert!(Color::equal(c1 * c2, Color::new(0.9, 0.2, 0.04)));
+    }
+
+    #[test]
+    fn creating_a_canvas() {
+        let c = Canvas::new(10, 20);
+        assert!(c.width == 10 && c.height == 20);
+
+        for line in c.grid {
+            for pixel in line {
+                assert!(Color::equal(pixel, Color::new(0.0, 0.0, 0.0)))
+            }
+        }
+    }
+
+    #[test]
+    fn writing_pixels_to_a_canvas() {
+        let mut c = Canvas::new(10, 20);
+        let red = Color::new(1.0, 0.0, 0.0);
+
+        c.write_pixel(2, 3, red);
+        assert!(Color::equal(c.pixel_at(2, 3), red))
     }
 }

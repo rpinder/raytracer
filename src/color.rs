@@ -1,5 +1,6 @@
 use crate::utils::fp_equal;
 
+#[derive(Clone, Copy)]
 pub struct Color {
     pub red: f32,
     pub green: f32,
