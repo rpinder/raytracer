@@ -137,7 +137,7 @@ impl std::ops::Div<f32> for Tuple {
 #[cfg(test)]
 mod tests {
     use crate::tuple::*;
-    
+
     #[test]
     fn tuple_with_w1_is_a_point() {
         let a = Tuple {
@@ -394,9 +394,3 @@ mod tests {
         assert!(Tuple::equal(b.cross(&a), Tuple::vector(1.0, -2.0, 1.0)))
     }
 }
-
-
-
-
-
-

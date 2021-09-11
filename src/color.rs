@@ -33,7 +33,7 @@ impl std::ops::Add for Color {
         Color::new(
             self.red + other.red,
             self.green + other.green,
-            self.blue + other.blue
+            self.blue + other.blue,
         )
     }
 }
@@ -45,7 +45,7 @@ impl std::ops::Sub for Color {
         Color::new(
             self.red - other.red,
             self.green - other.green,
-            self.blue - other.blue
+            self.blue - other.blue,
         )
     }
 }
@@ -54,11 +54,7 @@ impl std::ops::Mul<f32> for Color {
     type Output = Color;
 
     fn mul(self, other: f32) -> Color {
-        Color::new(
-            self.red * other,
-            self.green * other,
-            self.blue * other
-        )
+        Color::new(self.red * other, self.green * other, self.blue * other)
     }
 }
 
@@ -69,7 +65,7 @@ impl std::ops::Mul<Color> for Color {
         Color::new(
             self.red * other.red,
             self.green * other.green,
-            self.blue * other.blue
+            self.blue * other.blue,
         )
     }
 }
