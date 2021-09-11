@@ -48,6 +48,16 @@ impl Matrix {
         let col = col as usize;
         self.grid[row as usize * self.col as usize + col] = val;
     }
+
+    pub fn equal(a: Matrix, b: Matrix) -> bool {
+        assert!(a.row == b.row && a.col == b.col);
+        for i in 0..a.grid.len() {
+            if a.grid[i] != b.grid[i] {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 #[cfg(test)]
@@ -79,5 +89,47 @@ mod tests {
         assert!(fp_equal(m.get(0, 1), 5.0));
         assert!(fp_equal(m.get(1, 0), 1.0));
         assert!(fp_equal(m.get(1, 1), -2.0));
+    }
+
+    #[test]
+    fn a_3x3_matrix() {
+        let m = Matrix::new_filled(&[&[-3.0, 5.0, 0.0], &[1.0, -2.0, -7.0], &[0.0, 1.0, 1.0]]);
+        assert!(fp_equal(m.get(0, 0), -3.0));
+        assert!(fp_equal(m.get(1, 1), -2.0));
+        assert!(fp_equal(m.get(2, 2), 1.0));
+    }
+
+    #[test]
+    fn matrix_equality_with_identical_matrices() {
+        let m = Matrix::new_filled(&[
+            &[1.0,2.0,3.0,4.0],
+            &[5.0,6.0,7.0,8.0],
+            &[9.0,8.0,7.0,6.0],
+            &[5.0,4.0,3.0,2.0],
+        ]);
+        let n = Matrix::new_filled(&[
+            &[1.0,2.0,3.0,4.0],
+            &[5.0,6.0,7.0,8.0],
+            &[9.0,8.0,7.0,6.0],
+            &[5.0,4.0,3.0,2.0],
+        ]);
+        assert!(Matrix::equal(m, n));
+    }
+
+    #[test]
+    fn matrix_equality_with_different_matrices() {
+        let m = Matrix::new_filled(&[
+            &[1.0,2.0,3.0,4.0],
+            &[5.0,6.0,7.0,8.0],
+            &[9.0,8.0,7.0,6.0],
+            &[5.0,4.0,3.0,2.0],
+        ]);
+        let n = Matrix::new_filled(&[
+            &[2.0,3.0,4.0,5.0],
+            &[6.0,7.0,8.0,9.0],
+            &[8.0,7.0,6.0,5.0],
+            &[4.0,3.0,2.0,1.0],
+        ]);
+        assert!(!Matrix::equal(m, n));
     }
 }
