@@ -358,4 +358,25 @@ mod tests {
         let ppm = c.to_ppm();
         assert!(ppm.lines().collect::<Vec<_>>()[3..6] == vec!("255 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"))
     }
+
+    #[test]
+    fn splitting_long_lines_in_ppm_files() {
+        let mut c = Canvas::new(10, 2);
+        let color = Color::new(1.0, 0.8, 0.6);
+        for y in 0..2 {
+            for x in 0..10 {
+                c.write_pixel(x, y, color);
+            }
+        }
+        let ppm = c.to_ppm();
+        println!("{}", ppm);
+        assert!(ppm.lines().collect::<Vec<_>>()[3..7] == vec!("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204", "153 255 204 153 255 204 153 255 204 153 255 204 153", "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204", "153 255 204 153 255 204 153 255 204 153 255 204 153"));
+    }
+
+    #[test]
+    fn ppm_files_are_terminated_by_a_newline_character() {
+        let c = Canvas::new(5, 3);
+        let ppm = c.to_ppm();
+        assert!(ppm.ends_with('\n'));
+    }
 }

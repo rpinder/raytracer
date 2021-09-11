@@ -34,10 +34,16 @@ impl Canvas {
     pub fn to_ppm(self) -> String {
         let mut str = format!("P3\n{} {}\n255\n", self.width, self.height);
         for line in self.grid {
+            let mut newline = String::from("");
             for pixel in line {
                 let new = format!("{} {} {} ", Self::convert(pixel.red), Self::convert(pixel.green), Self::convert(pixel.blue));
-                str.push_str(&new);
+                newline.push_str(&new);
             }
+            if newline.len() > 70 {
+                let pos = newline[0..70].rfind(' ').unwrap();
+                newline.replace_range(pos..(pos+1), "\n");
+            }
+            str.push_str(&newline);
             str.pop();
             str.push_str(&"\n")
         }
