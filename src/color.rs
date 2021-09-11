@@ -73,3 +73,43 @@ impl std::ops::Mul<Color> for Color {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::color::*;
+
+    #[test]
+    fn colors_are_rgb_tuples() {
+        let c = Color::new(-0.5, 0.4, 1.7);
+        assert!(fp_equal(c.red, -0.5));
+        assert!(fp_equal(c.green, 0.4));
+        assert!(fp_equal(c.blue, 1.7));
+    }
+
+    #[test]
+    fn adding_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(Color::equal(c1 + c2, Color::new(1.6, 0.7, 1.0)));
+    }
+
+    #[test]
+    fn subtracting_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(Color::equal(c1 - c2, Color::new(0.2, 0.5, 0.5)));
+    }
+
+    #[test]
+    fn multiplying_a_color_by_a_scalar() {
+        let c = Color::new(0.2, 0.3, 0.4);
+        assert!(Color::equal(c * 2.0, Color::new(0.4, 0.6, 0.8)));
+    }
+
+    #[test]
+    fn multiplying_colors() {
+        let c1 = Color::new(1.0, 0.2, 0.4);
+        let c2 = Color::new(0.9, 1.0, 0.1);
+        assert!(Color::equal(c1 * c2, Color::new(0.9, 0.2, 0.04)));
+    }
+}
