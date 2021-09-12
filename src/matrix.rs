@@ -1,4 +1,5 @@
 use crate::tuple::Tuple;
+use crate::utils::fp_equal;
 use std::convert::TryInto;
 
 pub struct Matrix {
@@ -50,14 +51,33 @@ impl Matrix {
         self.grid[row as usize * self.col as usize + col] = val;
     }
 
-    pub fn equal(a: Matrix, b: Matrix) -> bool {
+    pub fn equal(a: &Matrix, b: &Matrix) -> bool {
         assert!(a.row == b.row && a.col == b.col);
         for i in 0..a.grid.len() {
-            if a.grid[i] != b.grid[i] {
+            if !fp_equal(a.grid[i], b.grid[i]) {
                 return false;
             }
         }
         true
+    }
+
+    pub fn transpose(self) -> Matrix {
+        let mut m = Matrix::new(4, 4);
+        for i in 0..4 {
+            for j in 0..4 {
+                m.set(j, i, self.get(i, j))
+            }
+        }
+        m
+    }
+
+    pub fn identity() -> Matrix {
+        Matrix::new_filled(&[
+            &[1.0, 0.0, 0.0, 0.0],
+            &[0.0, 1.0, 0.0, 0.0],
+            &[0.0, 0.0, 1.0, 0.0],
+            &[0.0, 0.0, 0.0, 1.0],
+        ])
     }
 }
 
@@ -152,7 +172,7 @@ mod tests {
             &[9.0, 8.0, 7.0, 6.0],
             &[5.0, 4.0, 3.0, 2.0],
         ]);
-        assert!(Matrix::equal(m, n));
+        assert!(Matrix::equal(&m, &n));
     }
 
     #[test]
@@ -169,7 +189,7 @@ mod tests {
             &[8.0, 7.0, 6.0, 5.0],
             &[4.0, 3.0, 2.0, 1.0],
         ]);
-        assert!(!Matrix::equal(m, n));
+        assert!(!Matrix::equal(&m, &n));
     }
 
     #[test]
@@ -194,7 +214,7 @@ mod tests {
             &[16.0, 26.0, 46.0, 42.0],
         ]);
 
-        assert!(Matrix::equal(m * n, x));
+        assert!(Matrix::equal(&(m * n), &x));
     }
 
     #[test]
@@ -219,6 +239,48 @@ mod tests {
                 z: 33.0,
                 w: 1.0
             }
+        ));
+    }
+
+    #[test]
+    fn multiplying_a_matrix_by_the_identity_matrix() {
+        let m = Matrix::new_filled(&[
+            &[0.0, 1.0, 2.0, 4.0],
+            &[1.0, 2.0, 4.0, 8.0],
+            &[2.0, 4.0, 8.0, 16.0],
+            &[4.0, 8.0, 16.0, 32.0],
+        ]);
+        let n = Matrix::new_filled(&[
+            &[0.0, 1.0, 2.0, 4.0],
+            &[1.0, 2.0, 4.0, 8.0],
+            &[2.0, 4.0, 8.0, 16.0],
+            &[4.0, 8.0, 16.0, 32.0],
+        ]);
+        assert!(Matrix::equal(&m, &(n * Matrix::identity())));
+    }
+
+    #[test]
+    fn transposing_a_matrix() {
+        let m = Matrix::new_filled(&[
+            &[0.0, 9.0, 3.0, 0.0],
+            &[9.0, 8.0, 0.0, 8.0],
+            &[1.0, 8.0, 5.0, 3.0],
+            &[0.0, 0.0, 5.0, 8.0],
+        ]);
+        let res = Matrix::new_filled(&[
+            &[0.0, 9.0, 1.0, 0.0],
+            &[9.0, 8.0, 8.0, 0.0],
+            &[3.0, 0.0, 5.0, 5.0],
+            &[0.0, 8.0, 3.0, 8.0],
+        ]);
+        assert!(Matrix::equal(&m.transpose(), &res));
+    }
+
+    #[test]
+    fn transposing_the_identity_matrix() {
+        assert!(Matrix::equal(
+            &Matrix::identity().transpose(),
+            &Matrix::identity()
         ));
     }
 }
