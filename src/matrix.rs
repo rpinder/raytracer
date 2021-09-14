@@ -90,7 +90,7 @@ impl Matrix {
         }
     }
 
-    pub fn submatrix(self, drow: u32, dcol: u32) -> Matrix {
+    pub fn submatrix(&self, drow: u32, dcol: u32) -> Matrix {
         let mut m = Matrix::new(self.row - 1, self.col - 1);
         let mut index = 0;
         for (i, val) in self.grid.iter().enumerate() {
@@ -101,6 +101,14 @@ impl Matrix {
             index = index + 1;
         }
         m
+    }
+
+    pub fn minor(&self, drow: u32, dcol: u32) -> f32 {
+        self.submatrix(drow, dcol).determinant()
+    }
+
+    pub fn cofactor(&self, drow: u32, dcol: u32) -> f32 {
+        self.minor(drow, dcol) * if (drow + dcol) % 2 == 0 { 1.0 } else { -1.0 }
     }
 }
 
@@ -344,5 +352,30 @@ mod tests {
             &[-7.0, -1.0, 1.0],
         ]);
         assert!(Matrix::equal(&a.submatrix(2, 1), &b));
+    }
+
+    #[test]
+    fn calculating_minor_3x3() {
+        let a = Matrix::new_filled(&[
+            &[3.0, 5.0, 0.0],
+            &[2.0, -1.0, -7.0],
+            &[6.0, -1.0, 5.0],
+        ]);
+        let b = a.submatrix(1, 0);
+        assert!(fp_equal(b.determinant(), 25.0));
+        assert!(fp_equal(a.minor(1, 0), 25.0));
+    }
+
+    #[test]
+    fn calculating_cofactor_of_3x3() {
+        let a = Matrix::new_filled(&[
+            &[3.0, 5.0, 0.0],
+            &[2.0, -1.0, -7.0],
+            &[6.0, -1.0, 5.0],
+        ]);
+        assert!(fp_equal(a.minor(0,0), -12.0));
+        assert!(fp_equal(a.cofactor(0,0), -12.0));
+        assert!(fp_equal(a.minor(1, 0), 25.0));
+        assert!(fp_equal(a.cofactor(1, 0), -25.0));
     }
 }
