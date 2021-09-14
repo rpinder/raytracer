@@ -79,6 +79,29 @@ impl Matrix {
             &[0.0, 0.0, 0.0, 1.0],
         ])
     }
+
+    pub fn determinant(self) -> f32 {
+        assert!(self.row == self.col);
+        match self.row {
+            2 => {
+                self.get(0,0) * self.get(1,1) - self.get(0,1) * self.get(1,0)
+            }
+            _ => panic!(),
+        }
+    }
+
+    pub fn submatrix(self, drow: u32, dcol: u32) -> Matrix {
+        let mut m = Matrix::new(self.row - 1, self.col - 1);
+        let mut index = 0;
+        for (i, val) in self.grid.iter().enumerate() {
+            if (i >= (drow * self.col).try_into().unwrap() && i < ((drow + 1) * self.col).try_into().unwrap()) || (i as u32) % self.col == dcol {
+                continue;
+            }
+            m.grid[index] = *val;
+            index = index + 1;
+        }
+        m
+    }
 }
 
 impl std::ops::Mul<Matrix> for Matrix {
@@ -282,5 +305,44 @@ mod tests {
             &Matrix::identity().transpose(),
             &Matrix::identity()
         ));
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_a_2x2_matrix() {
+        let m = Matrix::new_filled(&[
+            &[1.0, 5.0],
+            &[-3.0, 2.0],
+        ]);
+        assert!(fp_equal(m.determinant(), 17.0));
+    }
+
+    #[test]
+    fn submatrix_of_3x3_is_2x2() {
+        let a = Matrix::new_filled(&[
+            &[1.0, 5.0, 0.0],
+            &[-3.0, 2.0, 7.0],
+            &[0.0, 6.0, -3.0],
+        ]);
+        let b = Matrix::new_filled(&[
+            &[-3.0, 2.0],
+            &[0.0, 6.0],
+        ]);
+        assert!(Matrix::equal(&a.submatrix(0, 2), &b));
+    }
+
+    #[test]
+    fn submatrix_of_4x4_is_3x3() {
+        let a = Matrix::new_filled(&[
+            &[-6.0, 1.0, 1.0, 6.0],
+            &[-8.0, 5.0, 8.0, 6.0],
+            &[-1.0, 0.0, 8.0, 2.0],
+            &[-7.0, 1.0, -1.0, 1.0],
+        ]);
+        let b = Matrix::new_filled(&[
+            &[-6.0, 1.0, 6.0],
+            &[-8.0, 8.0, 6.0],
+            &[-7.0, -1.0, 1.0],
+        ]);
+        assert!(Matrix::equal(&a.submatrix(2, 1), &b));
     }
 }
