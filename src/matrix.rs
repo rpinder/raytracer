@@ -83,10 +83,14 @@ impl Matrix {
     pub fn determinant(self) -> f32 {
         assert!(self.row == self.col);
         match self.row {
-            2 => {
-                self.get(0,0) * self.get(1,1) - self.get(0,1) * self.get(1,0)
-            }
-            _ => panic!(),
+            2 => self.get(0,0) * self.get(1,1) - self.get(0,1) * self.get(1,0),
+            _ => {
+                let mut det = 0.0;
+                for i in 0..self.col {
+                    det = det + self.get(0, i) * self.cofactor(0, i)
+                }
+                det
+            },
         }
     }
 
@@ -377,5 +381,33 @@ mod tests {
         assert!(fp_equal(a.cofactor(0,0), -12.0));
         assert!(fp_equal(a.minor(1, 0), 25.0));
         assert!(fp_equal(a.cofactor(1, 0), -25.0));
+    }
+
+    #[test]
+    fn calculating_determinant_of_3x3() {
+        let a = Matrix::new_filled(&[
+            &[1.0, 2.0, 6.0],
+            &[-5.0, 8.0, -4.0],
+            &[2.0, 6.0, 4.0],
+        ]);
+        assert!(fp_equal(a.cofactor(0,0), 56.0));
+        assert!(fp_equal(a.cofactor(0,1), 12.0));
+        assert!(fp_equal(a.cofactor(0,2), -46.0));
+        assert!(fp_equal(a.determinant(), -196.0));
+    }
+
+    #[test]
+    fn calculating_determinant_of_4x4() {
+        let a = Matrix::new_filled(&[
+            &[-2.0, -8.0, 3.0, 5.0],
+            &[-3.0, 1.0, 7.0, 3.0],
+            &[1.0, 2.0, -9.0, 6.0],
+            &[-6.0, 7.0, 7.0, -9.0],
+        ]);
+        assert!(fp_equal(a.cofactor(0,0), 690.0));
+        assert!(fp_equal(a.cofactor(0,1), 447.0));
+        assert!(fp_equal(a.cofactor(0,2), 210.0));
+        assert!(fp_equal(a.cofactor(0,3), 51.0));
+        assert!(fp_equal(a.determinant(), -4071.0));
     }
 }
