@@ -143,6 +143,15 @@ impl Matrix {
         m.set(2, 3, z);
         m
     }
+
+    pub fn scaling(x: f32, y: f32, z: f32) -> Matrix {
+        let mut m = Matrix::new(4, 4);
+        m.set(0, 0, x);
+        m.set(1, 1, y);
+        m.set(2, 2, z);
+        m.set(3, 3, 1.0);
+        m
+    }
 }
 
 impl std::ops::Mul<Matrix> for Matrix {
@@ -551,5 +560,34 @@ mod tests {
         let transform = Matrix::translation(5.0, -3.0, 2.0);
         let v = Tuple::vector(-3.0, 4.0, 5.0);
         assert!(Tuple::equal(v, transform * v));
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_a_point() {
+        let transform = Matrix::scaling(2.0, 3.0, 4.0);
+        let p = Tuple::point(-4.0, 6.0, 8.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(-8.0, 18.0, 32.0)));
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_a_vector() {
+        let transform = Matrix::scaling(2.0, 3.0, 4.0);
+        let v = Tuple::vector(-4.0, 6.0, 8.0);
+        assert!(Tuple::equal(transform * v, Tuple::vector(-8.0, 18.0, 32.0)));
+    }
+
+    #[test]
+    fn multiplying_by_the_inverse_of_scaling_matrix() {
+        let transform = Matrix::scaling(2.0, 3.0, 4.0);
+        let inv = transform.inverse();
+        let v = Tuple::vector(-4.0, 6.0, 8.0);
+        assert!(Tuple::equal(inv * v, Tuple::vector(-2.0, 2.0, 2.0)));
+    }
+
+    #[test]
+    fn reflection_is_scaling_by_negative_value() {
+        let transform = Matrix::scaling(-1.0, 1.0, 1.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(-2.0, 3.0, 4.0)));
     }
 }
