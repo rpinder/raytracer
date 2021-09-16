@@ -83,14 +83,14 @@ impl Matrix {
     pub fn determinant(&self) -> f32 {
         assert!(self.row == self.col);
         match self.row {
-            2 => self.get(0,0) * self.get(1,1) - self.get(0,1) * self.get(1,0),
+            2 => self.get(0, 0) * self.get(1, 1) - self.get(0, 1) * self.get(1, 0),
             _ => {
                 let mut det = 0.0;
                 for i in 0..self.col {
                     det = det + self.get(0, i) * self.cofactor(0, i)
                 }
                 det
-            },
+            }
         }
     }
 
@@ -98,7 +98,10 @@ impl Matrix {
         let mut m = Matrix::new(self.row - 1, self.col - 1);
         let mut index = 0;
         for (i, val) in self.grid.iter().enumerate() {
-            if (i >= (drow * self.col).try_into().unwrap() && i < ((drow + 1) * self.col).try_into().unwrap()) || (i as u32) % self.col == dcol {
+            if (i >= (drow * self.col).try_into().unwrap()
+                && i < ((drow + 1) * self.col).try_into().unwrap())
+                || (i as u32) % self.col == dcol
+            {
                 continue;
             }
             m.grid[index] = *val;
@@ -130,6 +133,14 @@ impl Matrix {
                 m.set(col, row, c / self.determinant());
             }
         }
+        m
+    }
+
+    pub fn translation(x: f32, y: f32, z: f32) -> Matrix {
+        let mut m = Matrix::identity();
+        m.set(0, 3, x);
+        m.set(1, 3, y);
+        m.set(2, 3, z);
         m
     }
 }
@@ -356,24 +367,14 @@ mod tests {
 
     #[test]
     fn calculating_the_determinant_of_a_2x2_matrix() {
-        let m = Matrix::new_filled(&[
-            &[1.0, 5.0],
-            &[-3.0, 2.0],
-        ]);
+        let m = Matrix::new_filled(&[&[1.0, 5.0], &[-3.0, 2.0]]);
         assert!(fp_equal(m.determinant(), 17.0));
     }
 
     #[test]
     fn submatrix_of_3x3_is_2x2() {
-        let a = Matrix::new_filled(&[
-            &[1.0, 5.0, 0.0],
-            &[-3.0, 2.0, 7.0],
-            &[0.0, 6.0, -3.0],
-        ]);
-        let b = Matrix::new_filled(&[
-            &[-3.0, 2.0],
-            &[0.0, 6.0],
-        ]);
+        let a = Matrix::new_filled(&[&[1.0, 5.0, 0.0], &[-3.0, 2.0, 7.0], &[0.0, 6.0, -3.0]]);
+        let b = Matrix::new_filled(&[&[-3.0, 2.0], &[0.0, 6.0]]);
         assert!(Matrix::equal(&a.submatrix(0, 2), &b));
     }
 
@@ -385,21 +386,13 @@ mod tests {
             &[-1.0, 0.0, 8.0, 2.0],
             &[-7.0, 1.0, -1.0, 1.0],
         ]);
-        let b = Matrix::new_filled(&[
-            &[-6.0, 1.0, 6.0],
-            &[-8.0, 8.0, 6.0],
-            &[-7.0, -1.0, 1.0],
-        ]);
+        let b = Matrix::new_filled(&[&[-6.0, 1.0, 6.0], &[-8.0, 8.0, 6.0], &[-7.0, -1.0, 1.0]]);
         assert!(Matrix::equal(&a.submatrix(2, 1), &b));
     }
 
     #[test]
     fn calculating_minor_3x3() {
-        let a = Matrix::new_filled(&[
-            &[3.0, 5.0, 0.0],
-            &[2.0, -1.0, -7.0],
-            &[6.0, -1.0, 5.0],
-        ]);
+        let a = Matrix::new_filled(&[&[3.0, 5.0, 0.0], &[2.0, -1.0, -7.0], &[6.0, -1.0, 5.0]]);
         let b = a.submatrix(1, 0);
         assert!(fp_equal(b.determinant(), 25.0));
         assert!(fp_equal(a.minor(1, 0), 25.0));
@@ -407,27 +400,19 @@ mod tests {
 
     #[test]
     fn calculating_cofactor_of_3x3() {
-        let a = Matrix::new_filled(&[
-            &[3.0, 5.0, 0.0],
-            &[2.0, -1.0, -7.0],
-            &[6.0, -1.0, 5.0],
-        ]);
-        assert!(fp_equal(a.minor(0,0), -12.0));
-        assert!(fp_equal(a.cofactor(0,0), -12.0));
+        let a = Matrix::new_filled(&[&[3.0, 5.0, 0.0], &[2.0, -1.0, -7.0], &[6.0, -1.0, 5.0]]);
+        assert!(fp_equal(a.minor(0, 0), -12.0));
+        assert!(fp_equal(a.cofactor(0, 0), -12.0));
         assert!(fp_equal(a.minor(1, 0), 25.0));
         assert!(fp_equal(a.cofactor(1, 0), -25.0));
     }
 
     #[test]
     fn calculating_determinant_of_3x3() {
-        let a = Matrix::new_filled(&[
-            &[1.0, 2.0, 6.0],
-            &[-5.0, 8.0, -4.0],
-            &[2.0, 6.0, 4.0],
-        ]);
-        assert!(fp_equal(a.cofactor(0,0), 56.0));
-        assert!(fp_equal(a.cofactor(0,1), 12.0));
-        assert!(fp_equal(a.cofactor(0,2), -46.0));
+        let a = Matrix::new_filled(&[&[1.0, 2.0, 6.0], &[-5.0, 8.0, -4.0], &[2.0, 6.0, 4.0]]);
+        assert!(fp_equal(a.cofactor(0, 0), 56.0));
+        assert!(fp_equal(a.cofactor(0, 1), 12.0));
+        assert!(fp_equal(a.cofactor(0, 2), -46.0));
         assert!(fp_equal(a.determinant(), -196.0));
     }
 
@@ -439,10 +424,10 @@ mod tests {
             &[1.0, 2.0, -9.0, 6.0],
             &[-6.0, 7.0, 7.0, -9.0],
         ]);
-        assert!(fp_equal(a.cofactor(0,0), 690.0));
-        assert!(fp_equal(a.cofactor(0,1), 447.0));
-        assert!(fp_equal(a.cofactor(0,2), 210.0));
-        assert!(fp_equal(a.cofactor(0,3), 51.0));
+        assert!(fp_equal(a.cofactor(0, 0), 690.0));
+        assert!(fp_equal(a.cofactor(0, 1), 447.0));
+        assert!(fp_equal(a.cofactor(0, 2), 210.0));
+        assert!(fp_equal(a.cofactor(0, 3), 51.0));
         assert!(fp_equal(a.determinant(), -4071.0));
     }
 
@@ -454,7 +439,7 @@ mod tests {
             &[4.0, -9.0, 3.0, -7.0],
             &[9.0, 1.0, 7.0, -6.0],
         ]);
-        assert!(fp_equal(a.determinant(),-2120.0));
+        assert!(fp_equal(a.determinant(), -2120.0));
         assert!(a.invertible());
     }
 
@@ -466,7 +451,7 @@ mod tests {
             &[0.0, -5.0, 1.0, -5.0],
             &[0.0, 0.0, 0.0, 0.0],
         ]);
-        assert!(fp_equal(a.determinant(),0.0));
+        assert!(fp_equal(a.determinant(), 0.0));
         assert!(!a.invertible());
     }
 
@@ -481,15 +466,15 @@ mod tests {
         let b = a.inverse();
         assert!(fp_equal(a.determinant(), 532.0));
         assert!(fp_equal(a.cofactor(2, 3), -160.0));
-        assert!(fp_equal(b.get(3,2),-160.0/532.0));
+        assert!(fp_equal(b.get(3, 2), -160.0 / 532.0));
         assert!(fp_equal(a.cofactor(3, 2), 105.0));
-        assert!(fp_equal(b.get(2, 3), 105.0/532.0));
+        assert!(fp_equal(b.get(2, 3), 105.0 / 532.0));
 
         let c = Matrix::new_filled(&[
             &[0.21805, 0.45113, 0.24060, -0.04511],
             &[-0.80827, -1.45677, -0.44361, 0.52068],
             &[-0.07895, -0.22368, -0.05263, 0.19737],
-            &[-0.52256, -0.81391, -0.30075, 0.30639]
+            &[-0.52256, -0.81391, -0.30075, 0.30639],
         ]);
         assert!(Matrix::equal(&b, &c));
     }
@@ -506,7 +491,7 @@ mod tests {
             &[-0.15385, -0.15385, -0.28205, -0.53846],
             &[-0.07692, 0.12308, 0.02564, 0.03077],
             &[0.35897, 0.35897, 0.43590, 0.92308],
-            &[-0.69231, -0.69231, -0.76923, -1.92308]
+            &[-0.69231, -0.69231, -0.76923, -1.92308],
         ]);
         assert!(Matrix::equal(&a.inverse(), &b));
     }
@@ -544,5 +529,27 @@ mod tests {
         ]);
         let c = &a * &b;
         assert!(Matrix::equal(&(c * b.inverse()), &a));
+    }
+
+    #[test]
+    fn multiplying_by_a_translation_matrix() {
+        let transform = Matrix::translation(5.0, -3.0, 2.0);
+        let p = Tuple::point(-3.0, 4.0, 5.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 1.0, 7.0)));
+    }
+
+    #[test]
+    fn multiplying_by_inverse_of_translation_matrix() {
+        let transform = Matrix::translation(5.0, -3.0, 2.0);
+        let inv = transform.inverse();
+        let p = Tuple::point(-3.0, 4.0, 5.0);
+        assert!(Tuple::equal(inv * p, Tuple::point(-8.0, 7.0, 3.0)));
+    }
+
+    #[test]
+    fn translation_does_not_affect_vectors() {
+        let transform = Matrix::translation(5.0, -3.0, 2.0);
+        let v = Tuple::vector(-3.0, 4.0, 5.0);
+        assert!(Tuple::equal(v, transform * v));
     }
 }
