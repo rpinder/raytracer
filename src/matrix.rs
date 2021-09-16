@@ -80,7 +80,7 @@ impl Matrix {
         ])
     }
 
-    pub fn determinant(self) -> f32 {
+    pub fn determinant(&self) -> f32 {
         assert!(self.row == self.col);
         match self.row {
             2 => self.get(0,0) * self.get(1,1) - self.get(0,1) * self.get(1,0),
@@ -114,11 +114,46 @@ impl Matrix {
     pub fn cofactor(&self, drow: u32, dcol: u32) -> f32 {
         self.minor(drow, dcol) * if (drow + dcol) % 2 == 0 { 1.0 } else { -1.0 }
     }
+
+    pub fn invertible(&self) -> bool {
+        !fp_equal(self.determinant(), 0.0)
+    }
+
+    pub fn inverse(&self) -> Matrix {
+        assert!(self.invertible());
+
+        let mut m = Matrix::new(self.row, self.col);
+
+        for row in 0..self.row {
+            for col in 0..self.col {
+                let c = self.cofactor(row, col);
+                m.set(col, row, c / self.determinant());
+            }
+        }
+        m
+    }
 }
 
 impl std::ops::Mul<Matrix> for Matrix {
     type Output = Self;
     fn mul(self, other: Matrix) -> Matrix {
+        let mut m = Matrix::new(4, 4);
+        for row in 0..4 {
+            for col in 0..4 {
+                let val = self.get(row, 0) * other.get(0, col)
+                    + self.get(row, 1) * other.get(1, col)
+                    + self.get(row, 2) * other.get(2, col)
+                    + self.get(row, 3) * other.get(3, col);
+                m.set(row, col, val);
+            }
+        }
+        m
+    }
+}
+
+impl std::ops::Mul<&Matrix> for &Matrix {
+    type Output = Matrix;
+    fn mul(self, other: &Matrix) -> Matrix {
         let mut m = Matrix::new(4, 4);
         for row in 0..4 {
             for col in 0..4 {
@@ -409,5 +444,105 @@ mod tests {
         assert!(fp_equal(a.cofactor(0,2), 210.0));
         assert!(fp_equal(a.cofactor(0,3), 51.0));
         assert!(fp_equal(a.determinant(), -4071.0));
+    }
+
+    #[test]
+    fn invertible_matrix_for_invertibility() {
+        let a = Matrix::new_filled(&[
+            &[6.0, 4.0, 4.0, 4.0],
+            &[5.0, 5.0, 7.0, 6.0],
+            &[4.0, -9.0, 3.0, -7.0],
+            &[9.0, 1.0, 7.0, -6.0],
+        ]);
+        assert!(fp_equal(a.determinant(),-2120.0));
+        assert!(a.invertible());
+    }
+
+    #[test]
+    fn noninvertible_matrix_for_invertibility() {
+        let a = Matrix::new_filled(&[
+            &[-4.0, 2.0, -2.0, -3.0],
+            &[9.0, 6.0, 2.0, 6.0],
+            &[0.0, -5.0, 1.0, -5.0],
+            &[0.0, 0.0, 0.0, 0.0],
+        ]);
+        assert!(fp_equal(a.determinant(),0.0));
+        assert!(!a.invertible());
+    }
+
+    #[test]
+    fn calculating_inverse_of_matrix() {
+        let a = Matrix::new_filled(&[
+            &[-5.0, 2.0, 6.0, -8.0],
+            &[1.0, -5.0, 1.0, 8.0],
+            &[7.0, 7.0, -6.0, -7.0],
+            &[1.0, -3.0, 7.0, 4.0],
+        ]);
+        let b = a.inverse();
+        assert!(fp_equal(a.determinant(), 532.0));
+        assert!(fp_equal(a.cofactor(2, 3), -160.0));
+        assert!(fp_equal(b.get(3,2),-160.0/532.0));
+        assert!(fp_equal(a.cofactor(3, 2), 105.0));
+        assert!(fp_equal(b.get(2, 3), 105.0/532.0));
+
+        let c = Matrix::new_filled(&[
+            &[0.21805, 0.45113, 0.24060, -0.04511],
+            &[-0.80827, -1.45677, -0.44361, 0.52068],
+            &[-0.07895, -0.22368, -0.05263, 0.19737],
+            &[-0.52256, -0.81391, -0.30075, 0.30639]
+        ]);
+        assert!(Matrix::equal(&b, &c));
+    }
+
+    #[test]
+    fn calculating_inverse_of_matrix2() {
+        let a = Matrix::new_filled(&[
+            &[8.0, -5.0, 9.0, 2.0],
+            &[7.0, 5.0, 6.0, 1.0],
+            &[-6.0, 0.0, 9.0, 6.0],
+            &[-3.0, 0.0, -9.0, -4.0],
+        ]);
+        let b = Matrix::new_filled(&[
+            &[-0.15385, -0.15385, -0.28205, -0.53846],
+            &[-0.07692, 0.12308, 0.02564, 0.03077],
+            &[0.35897, 0.35897, 0.43590, 0.92308],
+            &[-0.69231, -0.69231, -0.76923, -1.92308]
+        ]);
+        assert!(Matrix::equal(&a.inverse(), &b));
+    }
+
+    #[test]
+    fn calculating_inverse_of_matrix3() {
+        let a = Matrix::new_filled(&[
+            &[9.0, 3.0, 0.0, 9.0],
+            &[-5.0, -2.0, -6.0, -3.0],
+            &[-4.0, 9.0, 6.0, 4.0],
+            &[-7.0, 6.0, 6.0, 2.0],
+        ]);
+        let b = Matrix::new_filled(&[
+            &[-0.04074, -0.07778, 0.14444, -0.22222],
+            &[-0.07778, 0.03333, 0.36667, -0.33333],
+            &[-0.02901, -0.14630, -0.10926, 0.12963],
+            &[0.17778, 0.06667, -0.26667, 0.33333],
+        ]);
+        assert!(Matrix::equal(&a.inverse(), &b));
+    }
+
+    #[test]
+    fn multiply_a_product_by_its_inverse() {
+        let a = Matrix::new_filled(&[
+            &[3.0, -9.0, 7.0, 3.0],
+            &[3.0, -8.0, 2.0, -9.0],
+            &[-4.0, 4.0, 4.0, 1.0],
+            &[-6.0, 5.0, -1.0, 1.0],
+        ]);
+        let b = Matrix::new_filled(&[
+            &[8.0, 2.0, 2.0, 2.0],
+            &[3.0, -1.0, 7.0, 0.0],
+            &[7.0, 0.0, 5.0, 4.0],
+            &[6.0, -2.0, 0.0, 5.0],
+        ]);
+        let c = &a * &b;
+        assert!(Matrix::equal(&(c * b.inverse()), &a));
     }
 }
