@@ -152,6 +152,33 @@ impl Matrix {
         m.set(3, 3, 1.0);
         m
     }
+
+    pub fn rotation_x(angle: f32) -> Matrix {
+        Matrix::new_filled(&[
+            &[1.0, 0.0, 0.0, 0.0],
+            &[0.0, angle.cos(), -angle.sin(), 0.0],
+            &[0.0, angle.sin(), angle.cos(), 0.0],
+            &[0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn rotation_y(angle: f32) -> Matrix {
+        Matrix::new_filled(&[
+            &[angle.cos(), 0.0, angle.sin(), 0.0],
+            &[0.0, 1.0, 0.0, 0.0],
+            &[-angle.sin(), 0.0, angle.cos(), 0.0],
+            &[0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    pub fn rotation_z(angle: f32) -> Matrix {
+        Matrix::new_filled(&[
+            &[angle.cos(), -angle.sin(), 0.0, 0.0],
+            &[angle.sin(), angle.cos(), 0.0, 0.0],
+            &[0.0, 0.0, 1.0, 0.0],
+            &[0.0, 0.0, 0.0, 1.0],
+        ])
+    }
 }
 
 impl std::ops::Mul<Matrix> for Matrix {
@@ -589,5 +616,52 @@ mod tests {
         let transform = Matrix::scaling(-1.0, 1.0, 1.0);
         let p = Tuple::point(2.0, 3.0, 4.0);
         assert!(Tuple::equal(transform * p, Tuple::point(-2.0, 3.0, 4.0)));
+    }
+
+    #[test]
+    fn rotating_point_around_x_axis() {
+        let p = Tuple::point(0.0, 1.0, 0.0);
+        let half_quarter = Matrix::rotation_x(std::f32::consts::PI / 4.0);
+        let full_quarter = Matrix::rotation_x(std::f32::consts::PI / 2.0);
+        assert!(Tuple::equal(
+            half_quarter * p,
+            Tuple::point(0.0, 2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0)
+        ));
+        assert!(Tuple::equal(full_quarter * p, Tuple::point(0.0, 0.0, 1.0)));
+    }
+
+    #[test]
+    fn inverse_of_x_rotation_rotates_in_opoosite_direction() {
+        let p = Tuple::point(0.0, 1.0, 0.0);
+        let half_quarter = Matrix::rotation_x(std::f32::consts::PI / 4.0);
+        let inv = half_quarter.inverse();
+        assert!(Tuple::equal(
+            inv * p,
+            Tuple::point(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0)
+        ));
+    }
+
+    #[test]
+    fn rotating_point_around_y_axis() {
+        let p = Tuple::point(0.0, 0.0, 1.0);
+        let half_quarter = Matrix::rotation_y(std::f32::consts::PI / 4.0);
+        let full_quarter = Matrix::rotation_y(std::f32::consts::PI / 2.0);
+        assert!(Tuple::equal(
+            half_quarter * p,
+            Tuple::point(2.0_f32.sqrt() / 2.0, 0.0, 2.0_f32.sqrt() / 2.0)
+        ));
+        assert!(Tuple::equal(full_quarter * p, Tuple::point(1.0, 0.0, 0.0)));
+    }
+
+    #[test]
+    fn rotating_point_around_z_axis() {
+        let p = Tuple::point(0.0, 1.0, 0.0);
+        let half_quarter = Matrix::rotation_z(std::f32::consts::PI / 4.0);
+        let full_quarter = Matrix::rotation_z(std::f32::consts::PI / 2.0);
+        assert!(Tuple::equal(
+            half_quarter * p,
+            Tuple::point(-2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0)
+        ));
+        assert!(Tuple::equal(full_quarter * p, Tuple::point(-1.0, 0.0, 0.0)));
     }
 }
