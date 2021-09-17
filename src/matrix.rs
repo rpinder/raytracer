@@ -179,6 +179,15 @@ impl Matrix {
             &[0.0, 0.0, 0.0, 1.0],
         ])
     }
+
+    pub fn shearing(xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Matrix {
+        Matrix::new_filled(&[
+            &[1.0, xy, xz, 0.0],
+            &[yx, 1.0, yz, 0.0],
+            &[zx, zy, 1.0, 0.0],
+            &[0.0, 0.0, 0.0, 1.0],
+        ])
+    }
 }
 
 impl std::ops::Mul<Matrix> for Matrix {
@@ -663,5 +672,43 @@ mod tests {
             Tuple::point(-2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0)
         ));
         assert!(Tuple::equal(full_quarter * p, Tuple::point(-1.0, 0.0, 0.0)));
+    }
+
+    #[test]
+    fn shearing_transformation_moves_x_in_proportion_to_y() {
+        let transform = Matrix::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(5.0, 3.0, 4.0)));
+    }
+
+    #[test]
+    fn shearing_transformation_moves_x_in_proportion_to_z() {
+        let transform = Matrix::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(6.0, 3.0, 4.0)));
+    }
+    #[test]
+    fn shearing_transformation_moves_y_in_proportion_to_x() {
+        let transform = Matrix::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 5.0, 4.0)));
+    }
+    #[test]
+    fn shearing_transformation_moves_y_in_proportion_to_z() {
+        let transform = Matrix::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 7.0, 4.0)));
+    }
+    #[test]
+    fn shearing_transformation_moves_z_in_proportion_to_x() {
+        let transform = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 3.0, 6.0)));
+    }
+    #[test]
+    fn shearing_transformation_moves_z_in_proportion_to_y() {
+        let transform = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let p = Tuple::point(2.0, 3.0, 4.0);
+        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 3.0, 7.0)));
     }
 }
