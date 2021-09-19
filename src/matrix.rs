@@ -1,4 +1,5 @@
-use crate::tuple::Tuple;
+use crate::point::Point;
+use crate::vector::Vector;
 use crate::utils::fp_equal;
 use std::convert::TryInto;
 
@@ -51,15 +52,6 @@ impl Matrix {
         self.grid[row as usize * self.col as usize + col] = val;
     }
 
-    pub fn equal(a: &Matrix, b: &Matrix) -> bool {
-        assert!(a.row == b.row && a.col == b.col);
-        for i in 0..a.grid.len() {
-            if !fp_equal(a.grid[i], b.grid[i]) {
-                return false;
-            }
-        }
-        true
-    }
 
     pub fn transpose(self) -> Matrix {
         let mut m = Matrix::new(4, 4);
@@ -224,24 +216,54 @@ impl std::ops::Mul<&Matrix> for &Matrix {
     }
 }
 
-impl std::ops::Mul<Tuple> for Matrix {
-    type Output = Tuple;
-    fn mul(self, other: Tuple) -> Tuple {
+impl std::ops::Mul<Point> for Matrix {
+    type Output = Point;
+    fn mul(self, other: Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
             .map(|x| {
                 return self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
-                    + self.get(x, 3) * other.w;
+                    + self.get(x, 3) * 1.0;
             })
             .collect();
-        Tuple {
+        Point {
             x: vals[0],
             y: vals[1],
             z: vals[2],
-            w: vals[3],
         }
+    }
+}
+
+impl std::ops::Mul<Vector> for Matrix {
+    type Output = Vector;
+     fn mul(self, other: Vector) -> Vector {
+        let vals: Vec<f32> = vec![0, 1, 2, 3]
+            .into_iter()
+            .map(|x| {
+                return self.get(x, 0) * other.x
+                    + self.get(x, 1) * other.y
+                    + self.get(x, 2) * other.z
+            })
+            .collect();
+        Vector {
+            x: vals[0],
+            y: vals[1],
+            z: vals[2],
+        }
+    }
+}
+
+impl PartialEq for Matrix {
+   fn eq(&self, other: &Self) -> bool {
+        assert!(self.row == other.row && self.col == other.col);
+        for i in 0..self.grid.len() {
+            if !fp_equal(self.grid[i], other.grid[i]) {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -298,7 +320,7 @@ mod tests {
             &[9.0, 8.0, 7.0, 6.0],
             &[5.0, 4.0, 3.0, 2.0],
         ]);
-        assert!(Matrix::equal(&m, &n));
+        assert!(m == n);
     }
 
     #[test]
@@ -315,7 +337,7 @@ mod tests {
             &[8.0, 7.0, 6.0, 5.0],
             &[4.0, 3.0, 2.0, 1.0],
         ]);
-        assert!(!Matrix::equal(&m, &n));
+        assert!(m != n);
     }
 
     #[test]
@@ -340,32 +362,25 @@ mod tests {
             &[16.0, 26.0, 46.0, 42.0],
         ]);
 
-        assert!(Matrix::equal(&(m * n), &x));
+        assert!(m * n == x);
     }
 
     #[test]
-    fn matrix_multiplied_by_a_tuple() {
+    fn matrix_multiplied_by_a_point() {
         let a = Matrix::new_filled(&[
             &[1.0, 2.0, 3.0, 4.0],
             &[2.0, 4.0, 4.0, 2.0],
             &[8.0, 6.0, 4.0, 1.0],
             &[0.0, 0.0, 0.0, 1.0],
         ]);
-        let b = Tuple {
-            x: 1.0,
-            y: 2.0,
-            z: 3.0,
-            w: 1.0,
-        };
-        assert!(Tuple::equal(
-            a * b,
-            Tuple {
+        let b = Point::new(1.0, 2.0, 3.0);
+        assert!(a * b ==
+            Point {
                 x: 18.0,
                 y: 24.0,
                 z: 33.0,
-                w: 1.0
             }
-        ));
+        );
     }
 
     #[test]
@@ -382,7 +397,7 @@ mod tests {
             &[2.0, 4.0, 8.0, 16.0],
             &[4.0, 8.0, 16.0, 32.0],
         ]);
-        assert!(Matrix::equal(&m, &(n * Matrix::identity())));
+        assert!(m == n * Matrix::identity());
     }
 
     #[test]
@@ -399,15 +414,12 @@ mod tests {
             &[3.0, 0.0, 5.0, 5.0],
             &[0.0, 8.0, 3.0, 8.0],
         ]);
-        assert!(Matrix::equal(&m.transpose(), &res));
+        assert!(m.transpose() == res);
     }
 
     #[test]
     fn transposing_the_identity_matrix() {
-        assert!(Matrix::equal(
-            &Matrix::identity().transpose(),
-            &Matrix::identity()
-        ));
+        assert!(Matrix::identity().transpose() == Matrix::identity());
     }
 
     #[test]
@@ -420,7 +432,7 @@ mod tests {
     fn submatrix_of_3x3_is_2x2() {
         let a = Matrix::new_filled(&[&[1.0, 5.0, 0.0], &[-3.0, 2.0, 7.0], &[0.0, 6.0, -3.0]]);
         let b = Matrix::new_filled(&[&[-3.0, 2.0], &[0.0, 6.0]]);
-        assert!(Matrix::equal(&a.submatrix(0, 2), &b));
+        assert!(a.submatrix(0, 2) == b);
     }
 
     #[test]
@@ -432,7 +444,7 @@ mod tests {
             &[-7.0, 1.0, -1.0, 1.0],
         ]);
         let b = Matrix::new_filled(&[&[-6.0, 1.0, 6.0], &[-8.0, 8.0, 6.0], &[-7.0, -1.0, 1.0]]);
-        assert!(Matrix::equal(&a.submatrix(2, 1), &b));
+        assert!(a.submatrix(2, 1) == b);
     }
 
     #[test]
@@ -521,7 +533,7 @@ mod tests {
             &[-0.07895, -0.22368, -0.05263, 0.19737],
             &[-0.52256, -0.81391, -0.30075, 0.30639],
         ]);
-        assert!(Matrix::equal(&b, &c));
+        assert!(b == c);
     }
 
     #[test]
@@ -538,7 +550,7 @@ mod tests {
             &[0.35897, 0.35897, 0.43590, 0.92308],
             &[-0.69231, -0.69231, -0.76923, -1.92308],
         ]);
-        assert!(Matrix::equal(&a.inverse(), &b));
+        assert!(a.inverse() == b);
     }
 
     #[test]
@@ -555,7 +567,7 @@ mod tests {
             &[-0.02901, -0.14630, -0.10926, 0.12963],
             &[0.17778, 0.06667, -0.26667, 0.33333],
         ]);
-        assert!(Matrix::equal(&a.inverse(), &b));
+        assert!(a.inverse() == b);
     }
 
     #[test]
@@ -573,142 +585,157 @@ mod tests {
             &[6.0, -2.0, 0.0, 5.0],
         ]);
         let c = &a * &b;
-        assert!(Matrix::equal(&(c * b.inverse()), &a));
+        assert!(c * b.inverse() == a);
     }
 
     #[test]
     fn multiplying_by_a_translation_matrix() {
         let transform = Matrix::translation(5.0, -3.0, 2.0);
-        let p = Tuple::point(-3.0, 4.0, 5.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 1.0, 7.0)));
+        let p = Point::new(-3.0, 4.0, 5.0);
+        assert!(transform * p == Point::new(2.0, 1.0, 7.0));
     }
 
     #[test]
     fn multiplying_by_inverse_of_translation_matrix() {
         let transform = Matrix::translation(5.0, -3.0, 2.0);
         let inv = transform.inverse();
-        let p = Tuple::point(-3.0, 4.0, 5.0);
-        assert!(Tuple::equal(inv * p, Tuple::point(-8.0, 7.0, 3.0)));
+        let p = Point::new(-3.0, 4.0, 5.0);
+        assert!(inv * p == Point::new(-8.0, 7.0, 3.0));
     }
 
     #[test]
     fn translation_does_not_affect_vectors() {
         let transform = Matrix::translation(5.0, -3.0, 2.0);
-        let v = Tuple::vector(-3.0, 4.0, 5.0);
-        assert!(Tuple::equal(v, transform * v));
+        let v = Vector::new(-3.0, 4.0, 5.0);
+        assert!(v == transform * v);
     }
 
     #[test]
     fn scaling_matrix_applied_to_a_point() {
         let transform = Matrix::scaling(2.0, 3.0, 4.0);
-        let p = Tuple::point(-4.0, 6.0, 8.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(-8.0, 18.0, 32.0)));
+        let p = Point::new(-4.0, 6.0, 8.0);
+        assert!(transform * p == Point::new(-8.0, 18.0, 32.0));
     }
 
     #[test]
     fn scaling_matrix_applied_to_a_vector() {
         let transform = Matrix::scaling(2.0, 3.0, 4.0);
-        let v = Tuple::vector(-4.0, 6.0, 8.0);
-        assert!(Tuple::equal(transform * v, Tuple::vector(-8.0, 18.0, 32.0)));
+        let v = Vector::new(-4.0, 6.0, 8.0);
+        assert!(transform * v == Vector::new(-8.0, 18.0, 32.0));
     }
 
     #[test]
     fn multiplying_by_the_inverse_of_scaling_matrix() {
         let transform = Matrix::scaling(2.0, 3.0, 4.0);
         let inv = transform.inverse();
-        let v = Tuple::vector(-4.0, 6.0, 8.0);
-        assert!(Tuple::equal(inv * v, Tuple::vector(-2.0, 2.0, 2.0)));
+        let v = Point::new(-4.0, 6.0, 8.0);
+        assert!(inv * v == Point::new(-2.0, 2.0, 2.0));
     }
 
     #[test]
     fn reflection_is_scaling_by_negative_value() {
         let transform = Matrix::scaling(-1.0, 1.0, 1.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(-2.0, 3.0, 4.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(-2.0, 3.0, 4.0));
     }
 
     #[test]
     fn rotating_point_around_x_axis() {
-        let p = Tuple::point(0.0, 1.0, 0.0);
+        let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = Matrix::rotation_x(std::f32::consts::PI / 4.0);
         let full_quarter = Matrix::rotation_x(std::f32::consts::PI / 2.0);
-        assert!(Tuple::equal(
-            half_quarter * p,
-            Tuple::point(0.0, 2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0)
-        ));
-        assert!(Tuple::equal(full_quarter * p, Tuple::point(0.0, 0.0, 1.0)));
+        assert!(half_quarter * p == Point::new(0.0, 2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0));
+        assert!(full_quarter * p == Point::new(0.0, 0.0, 1.0));
     }
 
     #[test]
     fn inverse_of_x_rotation_rotates_in_opoosite_direction() {
-        let p = Tuple::point(0.0, 1.0, 0.0);
+        let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = Matrix::rotation_x(std::f32::consts::PI / 4.0);
         let inv = half_quarter.inverse();
-        assert!(Tuple::equal(
-            inv * p,
-            Tuple::point(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0)
-        ));
+        assert!(inv * p == Point::new(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0));
     }
 
     #[test]
     fn rotating_point_around_y_axis() {
-        let p = Tuple::point(0.0, 0.0, 1.0);
+        let p = Point::new(0.0, 0.0, 1.0);
         let half_quarter = Matrix::rotation_y(std::f32::consts::PI / 4.0);
         let full_quarter = Matrix::rotation_y(std::f32::consts::PI / 2.0);
-        assert!(Tuple::equal(
-            half_quarter * p,
-            Tuple::point(2.0_f32.sqrt() / 2.0, 0.0, 2.0_f32.sqrt() / 2.0)
-        ));
-        assert!(Tuple::equal(full_quarter * p, Tuple::point(1.0, 0.0, 0.0)));
+        assert!(half_quarter * p == Point::new(2.0_f32.sqrt() / 2.0, 0.0, 2.0_f32.sqrt() / 2.0));
+        assert!(full_quarter * p == Point::new(1.0, 0.0, 0.0));
     }
 
     #[test]
     fn rotating_point_around_z_axis() {
-        let p = Tuple::point(0.0, 1.0, 0.0);
+        let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = Matrix::rotation_z(std::f32::consts::PI / 4.0);
         let full_quarter = Matrix::rotation_z(std::f32::consts::PI / 2.0);
-        assert!(Tuple::equal(
-            half_quarter * p,
-            Tuple::point(-2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0)
-        ));
-        assert!(Tuple::equal(full_quarter * p, Tuple::point(-1.0, 0.0, 0.0)));
+        assert!(half_quarter * p == Point::new(-2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0));
+        assert!(full_quarter * p == Point::new(-1.0, 0.0, 0.0));
     }
 
     #[test]
     fn shearing_transformation_moves_x_in_proportion_to_y() {
         let transform = Matrix::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(5.0, 3.0, 4.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(5.0, 3.0, 4.0));
     }
 
     #[test]
     fn shearing_transformation_moves_x_in_proportion_to_z() {
         let transform = Matrix::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(6.0, 3.0, 4.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(6.0, 3.0, 4.0));
     }
     #[test]
     fn shearing_transformation_moves_y_in_proportion_to_x() {
         let transform = Matrix::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 5.0, 4.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(2.0, 5.0, 4.0));
     }
     #[test]
     fn shearing_transformation_moves_y_in_proportion_to_z() {
         let transform = Matrix::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 7.0, 4.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(2.0, 7.0, 4.0));
     }
     #[test]
     fn shearing_transformation_moves_z_in_proportion_to_x() {
         let transform = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 3.0, 6.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(2.0, 3.0, 6.0));
     }
     #[test]
     fn shearing_transformation_moves_z_in_proportion_to_y() {
         let transform = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-        let p = Tuple::point(2.0, 3.0, 4.0);
-        assert!(Tuple::equal(transform * p, Tuple::point(2.0, 3.0, 7.0)));
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert!(transform * p == Point::new(2.0, 3.0, 7.0));
+    }
+
+    #[test]
+    fn individual_transformations_are_applied_in_sequence() {
+        let p = Point::new(1.0, 0.0, 1.0);
+        let a = Matrix::rotation_x(std::f32::consts::PI / 2.0);
+        let b = Matrix::scaling(5.0, 5.0, 5.0);
+        let c = Matrix::translation(10.0, 5.0, 7.0);
+
+        let p2 = a * p;
+        assert!(p2 == Point::new(1.0, -1.0, 0.0));
+
+        let p3 = b * p2;
+        assert!(p3 == Point::new(5.0, -5.0, 0.0));
+
+        let p4 = c * p3;
+        assert!(p4 == Point::new(15.0, 0.0, 7.0));
+    }
+
+    #[test]
+    fn chained_transformations_must_be_applied_in_reverse_order() {
+        let p = Point::new(1.0, 0.0, 1.0);
+        let a = Matrix::rotation_x(std::f32::consts::PI / 2.0);
+        let b = Matrix::scaling(5.0, 5.0, 5.0);
+        let c = Matrix::translation(10.0, 5.0, 7.0);
+        let t = c * b * a;
+        assert!(t * p == Point::new(15.0, 0.0, 7.0));
     }
 }
