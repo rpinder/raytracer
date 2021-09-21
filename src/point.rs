@@ -53,9 +53,10 @@ impl std::ops::Add<Vector> for Point {
     }
 }
 
+#[cfg(test)]
 mod tests {
-    use crate::point::*;
-
+    use super::*;
+    
     #[test]
     fn subtracting_two_points() {
         let p1 = Point::new(3.0, 2.0, 1.0);

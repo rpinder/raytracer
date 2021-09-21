@@ -108,8 +108,9 @@ impl std::ops::Div<f32> for Vector {
     }
 }
 
+#[cfg(test)]
 mod tests {
-    use crate::vector::*;
+    use super::*;
 
     #[test]
     fn adding_two_vectors() {
@@ -149,7 +150,7 @@ mod tests {
     #[test]
     fn multiplying_a_vector_by_a_scalar() {
         let a = Vector::new(1.0, -2.0, 3.0);
-        assert!(a * 3.5 == Vector::new(3.0, -7.0, 10.5));
+        assert!(a * 3.5 == Vector::new(3.5, -7.0, 10.5));
     }
 
     #[test]

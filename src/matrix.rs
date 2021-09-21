@@ -269,8 +269,7 @@ impl PartialEq for Matrix {
 
 #[cfg(test)]
 mod tests {
-    use crate::matrix::*;
-    use crate::utils::fp_equal;
+    use super::*;
 
     #[test]
     fn constructing_and_inspecting_a_4x4_matrix() {

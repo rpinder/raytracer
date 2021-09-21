@@ -65,7 +65,7 @@ impl Canvas {
 
 #[cfg(test)]
 mod tests {
-    use crate::canvas::*;
+    use super::*;
 
     #[test]
     fn creating_a_canvas() {

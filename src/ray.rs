@@ -49,8 +49,9 @@ impl Ray {
     }
 }
 
+#[cfg(test)]
 mod tests {
-    use crate::ray::*;
+    use super::*;
     use crate::utils::fp_equal;
 
     #[test]

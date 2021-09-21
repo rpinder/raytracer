@@ -72,7 +72,7 @@ impl std::ops::Mul<Color> for Color {
 
 #[cfg(test)]
 mod tests {
-    use crate::color::*;
+    use super::*;
 
     #[test]
     fn colors_are_rgb_tuples() {
