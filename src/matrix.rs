@@ -1,8 +1,9 @@
 use crate::point::Point;
-use crate::vector::Vector;
 use crate::utils::fp_equal;
+use crate::vector::Vector;
 use std::convert::TryInto;
 
+#[derive(Clone)]
 pub struct Matrix {
     row: u32,
     col: u32,
@@ -51,7 +52,6 @@ impl Matrix {
         let col = col as usize;
         self.grid[row as usize * self.col as usize + col] = val;
     }
-
 
     pub fn transpose(self) -> Matrix {
         let mut m = Matrix::new(4, 4);
@@ -236,15 +236,54 @@ impl std::ops::Mul<Point> for Matrix {
     }
 }
 
-impl std::ops::Mul<Vector> for Matrix {
-    type Output = Vector;
-     fn mul(self, other: Vector) -> Vector {
+impl std::ops::Mul<&Point> for &Matrix {
+    type Output = Point;
+    fn mul(self, other: &Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
             .map(|x| {
                 return self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
+                    + self.get(x, 3) * 1.0;
+            })
+            .collect();
+        Point {
+            x: vals[0],
+            y: vals[1],
+            z: vals[2],
+        }
+    }
+}
+
+impl std::ops::Mul<Vector> for Matrix {
+    type Output = Vector;
+    fn mul(self, other: Vector) -> Vector {
+        let vals: Vec<f32> = vec![0, 1, 2, 3]
+            .into_iter()
+            .map(|x| {
+                return self.get(x, 0) * other.x
+                    + self.get(x, 1) * other.y
+                    + self.get(x, 2) * other.z;
+            })
+            .collect();
+        Vector {
+            x: vals[0],
+            y: vals[1],
+            z: vals[2],
+        }
+    }
+}
+
+impl std::ops::Mul<&Vector> for &Matrix {
+    type Output = Vector;
+    fn mul(self, other: &Vector) -> Vector {
+        let vals: Vec<f32> = vec![0, 1, 2, 3]
+            .into_iter()
+            .map(|x| {
+                return self.get(x, 0) * other.x
+                    + self.get(x, 1) * other.y
+                    + self.get(x, 2) * other.z;
             })
             .collect();
         Vector {
@@ -256,7 +295,7 @@ impl std::ops::Mul<Vector> for Matrix {
 }
 
 impl PartialEq for Matrix {
-   fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         assert!(self.row == other.row && self.col == other.col);
         for i in 0..self.grid.len() {
             if !fp_equal(self.grid[i], other.grid[i]) {
@@ -373,12 +412,13 @@ mod tests {
             &[0.0, 0.0, 0.0, 1.0],
         ]);
         let b = Point::new(1.0, 2.0, 3.0);
-        assert!(a * b ==
-            Point {
-                x: 18.0,
-                y: 24.0,
-                z: 33.0,
-            }
+        assert!(
+            a * b
+                == Point {
+                    x: 18.0,
+                    y: 24.0,
+                    z: 33.0,
+                }
         );
     }
 

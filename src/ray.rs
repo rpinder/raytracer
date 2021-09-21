@@ -1,7 +1,8 @@
+use crate::matrix::Matrix;
 use crate::point::Point;
-use crate::vector::Vector;
 use crate::sphere::Sphere;
 use crate::utils::fp_equal;
+use crate::vector::Vector;
 
 pub struct Ray {
     origin: Point,
@@ -41,6 +42,12 @@ impl Ray {
 
         Some((Intersection::new(t1, s), Intersection::new(t2, s)))
     }
+
+    pub fn transform(&self, m: Matrix) -> Ray {
+        let origin = &m * &self.origin();
+        let direction = &m * &self.direction();
+        Ray { origin, direction }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -51,7 +58,7 @@ pub struct Intersection {
 
 impl Intersection {
     pub fn new(t: f32, object: Sphere) -> Intersection {
-        Intersection {t, object}
+        Intersection { t, object }
     }
 
     pub fn t(&self) -> f32 {
@@ -223,5 +230,23 @@ mod tests {
         let xs = intersections(&[i1, i2, i3, i4]);
         let i = hit(xs);
         assert!(i == Some(i4));
+    }
+
+    #[test]
+    fn translating_a_ray() {
+        let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector::new(0.0, 1.0, 0.0));
+        let m = Matrix::translation(3.0, 4.0, 5.0);
+        let r2 = r.transform(m);
+        assert!(r2.origin() == Point::new(4.0, 6.0, 8.0));
+        assert!(r2.direction() == Vector::new(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn scaling_a_ray() {
+        let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector::new(0.0, 1.0, 0.0));
+        let m = Matrix::scaling(2.0, 3.0, 4.0);
+        let r2 = r.transform(m);
+        assert!(r2.origin() == Point::new(2.0, 6.0, 12.0));
+        assert!(r2.direction() == Vector::new(0.0, 3.0, 0.0));
     }
 }
