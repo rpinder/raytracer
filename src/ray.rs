@@ -1,13 +1,7 @@
 use crate::point::Point;
 use crate::vector::Vector;
-
-pub struct Sphere;
-
-impl Sphere {
-    pub fn new() -> Sphere {
-        Sphere
-    }
-}
+use crate::sphere::Sphere;
+use crate::utils::fp_equal;
 
 pub struct Ray {
     origin: Point,
@@ -31,7 +25,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersect(&self, s: Sphere) -> Option<(f32, f32)> {
+    pub fn intersect(&self, s: Sphere) -> Option<(Intersection, Intersection)> {
         let sphere_to_ray = self.origin - Point::new(0.0, 0.0, 0.0);
         let a = self.direction().dot(&self.direction());
         let b = 2.0 * self.direction().dot(&sphere_to_ray);
@@ -45,8 +39,51 @@ impl Ray {
         let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
         let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
-        Some((t1, t2))
+        Some((Intersection::new(t1, s), Intersection::new(t2, s)))
     }
+}
+
+#[derive(Clone, Copy)]
+pub struct Intersection {
+    t: f32,
+    object: Sphere,
+}
+
+impl Intersection {
+    pub fn new(t: f32, object: Sphere) -> Intersection {
+        Intersection {t, object}
+    }
+
+    pub fn t(&self) -> f32 {
+        self.t
+    }
+
+    pub fn object(&self) -> Sphere {
+        self.object
+    }
+}
+
+impl PartialEq for Intersection {
+    fn eq(&self, other: &Self) -> bool {
+        fp_equal(self.t(), other.t())
+    }
+}
+
+fn intersections(inters: &[Intersection]) -> Vec<Intersection> {
+    inters.to_vec()
+}
+
+fn hit(intersections: Vec<Intersection>) -> Option<Intersection> {
+    let above_zero = intersections.iter().filter(|x| x.t() > 0.0);
+    let mut current = std::f32::MAX;
+    let mut cinter: Option<Intersection> = None;
+    above_zero.into_iter().for_each(|inter| {
+        if inter.t() < current {
+            current = inter.t();
+            cinter = Some(inter.clone());
+        }
+    });
+    cinter
 }
 
 #[cfg(test)]
@@ -77,10 +114,10 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(s);
-        assert!(xs != None);
+        assert!(xs.is_some());
         let xs = xs.unwrap();
-        assert!(fp_equal(xs.0, 4.0));
-        assert!(fp_equal(xs.1, 6.0));
+        assert!(fp_equal(xs.0.t, 4.0));
+        assert!(fp_equal(xs.1.t, 6.0));
     }
 
     #[test]
@@ -88,10 +125,10 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(s);
-        assert!(xs != None);
+        assert!(xs.is_some());
         let xs = xs.unwrap();
-        assert!(fp_equal(xs.0, 5.0));
-        assert!(fp_equal(xs.1, 5.0));
+        assert!(fp_equal(xs.0.t, 5.0));
+        assert!(fp_equal(xs.1.t, 5.0));
     }
 
     #[test]
@@ -99,7 +136,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(s);
-        assert!(xs == None);
+        assert!(xs.is_none());
     }
 
     #[test]
@@ -107,10 +144,10 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(s);
-        assert!(xs != None);
+        assert!(xs.is_some());
         let xs = xs.unwrap();
-        assert!(fp_equal(xs.0, -1.0));
-        assert!(fp_equal(xs.1, 1.0));
+        assert!(fp_equal(xs.0.t, -1.0));
+        assert!(fp_equal(xs.1.t, 1.0));
     }
 
     #[test]
@@ -118,9 +155,73 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(s);
-        assert!(xs != None);
+        assert!(xs.is_some());
         let xs = xs.unwrap();
-        assert!(fp_equal(xs.0, -6.0));
-        assert!(fp_equal(xs.1, -4.0));
+        assert!(fp_equal(xs.0.t, -6.0));
+        assert!(fp_equal(xs.1.t, -4.0));
+    }
+
+    #[test]
+    fn aggregating_intersections() {
+        let s = Sphere::new();
+        let i1 = Intersection::new(1.0, s);
+        let i2 = Intersection::new(2.0, s);
+        let xs = intersections(&[i1, i2]);
+        assert!(xs.len() == 2);
+        assert!(fp_equal(xs[0].t(), 1.0));
+        assert!(fp_equal(xs[1].t(), 2.0));
+    }
+
+    #[test]
+    fn intersect_sets_the_object_on_the_intersection() {
+        let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+        let s = Sphere::new();
+        let xs = r.intersect(s);
+        assert!(xs.is_some());
+        let xs = xs.unwrap();
+        assert!(xs.0.object() == s);
+        assert!(xs.1.object() == s);
+    }
+
+    #[test]
+    fn hit_when_all_positive_t() {
+        let s = Sphere::new();
+        let i1 = Intersection::new(1.0, s);
+        let i2 = Intersection::new(2.0, s);
+        let xs = intersections(&[i2, i1]);
+        let i = hit(xs);
+        assert!(i == Some(i1));
+    }
+
+    #[test]
+    fn hit_when_some_negative_t() {
+        let s = Sphere::new();
+        let i1 = Intersection::new(-1.0, s);
+        let i2 = Intersection::new(1.0, s);
+        let xs = intersections(&[i2, i1]);
+        let i = hit(xs);
+        assert!(i == Some(i2));
+    }
+
+    #[test]
+    fn hit_when_all_negative_t() {
+        let s = Sphere::new();
+        let i1 = Intersection::new(-2.0, s);
+        let i2 = Intersection::new(-1.0, s);
+        let xs = intersections(&[i2, i1]);
+        let i = hit(xs);
+        assert!(i == None);
+    }
+
+    #[test]
+    fn hit_is_always_lowest_nonnegative_intersection() {
+        let s = Sphere::new();
+        let i1 = Intersection::new(5.0, s);
+        let i2 = Intersection::new(7.0, s);
+        let i3 = Intersection::new(-3.0, s);
+        let i4 = Intersection::new(2.0, s);
+        let xs = intersections(&[i1, i2, i3, i4]);
+        let i = hit(xs);
+        assert!(i == Some(i4));
     }
 }
