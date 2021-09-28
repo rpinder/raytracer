@@ -26,7 +26,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn intersect(&self, s: &Sphere) -> Option<(Intersection, Intersection)> {
+    pub fn intersect(&self, s: &Sphere) -> Vec<Intersection> {
         let ray = self.transform(s.transform().inverse());
         let sphere_to_ray = ray.origin - Point::new(0.0, 0.0, 0.0);
         let a = ray.direction().dot(&ray.direction());
@@ -35,7 +35,7 @@ impl Ray {
         let discriminant = b.powi(2) - 4.0 * a * c;
 
         if discriminant < 0.0 {
-            return None;
+            return vec![];
         }
 
         let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
@@ -43,7 +43,7 @@ impl Ray {
 
         let s1 = s.clone();
         let s2 = s.clone();
-        Some((Intersection::new(t1, s1), Intersection::new(t2, s2)))
+        vec![Intersection::new(t1, s1), Intersection::new(t2, s2)]
     }
 
     pub fn transform(&self, m: Matrix) -> Ray {
@@ -83,7 +83,7 @@ fn intersections(inters: &[Intersection]) -> Vec<Intersection> {
     inters.to_vec()
 }
 
-fn hit(intersections: Vec<Intersection>) -> Option<Intersection> {
+pub fn hit(intersections: Vec<Intersection>) -> Option<Intersection> {
     let above_zero = intersections.iter().filter(|x| x.t() > 0.0);
     let mut current = std::f32::MAX;
     let mut cinter: Option<Intersection> = None;
@@ -124,10 +124,8 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(fp_equal(xs.0.t, 4.0));
-        assert!(fp_equal(xs.1.t, 6.0));
+        assert!(fp_equal(xs[0].t, 4.0));
+        assert!(fp_equal(xs[1].t, 6.0));
     }
 
     #[test]
@@ -135,10 +133,8 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(fp_equal(xs.0.t, 5.0));
-        assert!(fp_equal(xs.1.t, 5.0));
+        assert!(fp_equal(xs[0].t, 5.0));
+        assert!(fp_equal(xs[1].t, 5.0));
     }
 
     #[test]
@@ -146,7 +142,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_none());
+        assert!(xs.is_empty());
     }
 
     #[test]
@@ -154,10 +150,8 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(fp_equal(xs.0.t, -1.0));
-        assert!(fp_equal(xs.1.t, 1.0));
+        assert!(fp_equal(xs[0].t, -1.0));
+        assert!(fp_equal(xs[1].t, 1.0));
     }
 
     #[test]
@@ -165,10 +159,8 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(fp_equal(xs.0.t, -6.0));
-        assert!(fp_equal(xs.1.t, -4.0));
+        assert!(fp_equal(xs[0].t, -6.0));
+        assert!(fp_equal(xs[1].t, -4.0));
     }
 
     #[test]
@@ -188,10 +180,8 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let s = Sphere::new();
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(xs.0.object() == &s);
-        assert!(xs.1.object() == &s);
+        assert!(xs[0].object() == &s);
+        assert!(xs[1].object() == &s);
     }
 
     #[test]

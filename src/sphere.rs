@@ -50,10 +50,8 @@ mod tests {
         let mut s = Sphere::new();
         s.set_transform(Matrix::scaling(2.0, 2.0, 2.0));
         let xs = r.intersect(&s);
-        assert!(xs.is_some());
-        let xs = xs.unwrap();
-        assert!(fp_equal(xs.0.t(), 3.0));
-        assert!(fp_equal(xs.1.t(), 7.0));
+        assert!(fp_equal(xs[0].t(), 3.0));
+        assert!(fp_equal(xs[1].t(), 7.0));
     }
 
     #[test]
@@ -62,7 +60,7 @@ mod tests {
         let mut s = Sphere::new();
         s.set_transform(Matrix::translation(5.0, 0.0, 0.0));
         let xs = r.intersect(&s);
-        assert!(xs.is_none());
+        assert!(xs.is_empty());
     }
 }
 
