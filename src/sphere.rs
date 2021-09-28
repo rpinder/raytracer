@@ -23,6 +23,14 @@ impl Sphere {
     pub fn set_transform(&mut self, m: Matrix) {
         self.matrix = m;
     }
+
+    pub fn normal_at(&self, p: Point) -> Vector {
+        // return (p - Point::new(0.0, 0.0, 0.0)).normalize()
+        let object_point = self.transform().inverse() * p;
+        let object_normal = object_point - Point::new(0.0, 0.0, 0.0);
+        let world_normal = self.transform().inverse().transpose() * object_normal;
+        world_normal.normalize()
+    }
 }
 
 #[cfg(test)]
@@ -61,6 +69,60 @@ mod tests {
         s.set_transform(Matrix::translation(5.0, 0.0, 0.0));
         let xs = r.intersect(&s);
         assert!(xs.is_empty());
+    }
+
+    #[test]
+    fn sphere_normal_at_x_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(Point::new(1.0, 0.0, 0.0));
+        assert!(n == Vector::new(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn sphere_normal_at_y_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(Point::new(0.0, 1.0, 0.0));
+        assert!(n == Vector::new(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn sphere_normal_at_z_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(Point::new(0.0, 0.0, 1.0));
+        assert!(n == Vector::new(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn sphere_normal_at_nonaxial() {
+        let s = Sphere::new();
+        let x = 3.0_f32.sqrt()/3.0;
+        let n = s.normal_at(Point::new(x, x, x));
+        assert!(n == Vector::new(x, x, x));
+    }
+
+    #[test]
+    fn normal_is_normalized() {
+        let s = Sphere::new();
+        let x = 3.0_f32.sqrt()/3.0;
+        let n = s.normal_at(Point::new(x,x,x));
+        assert!(n == n.normalize());
+    }
+
+    #[test]
+    fn computinog_normal_on_translated_sphere() {
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::translation(0.0, 1.0, 0.0));
+        let n = s.normal_at(Point::new(0.0, 1.70711, -0.70711));
+        assert!(n == Vector::new(0.0, 0.70711, -0.70711));
+    }
+
+    #[test]
+    fn computing_normal_on_transformed_sphere() {
+        let mut s = Sphere::new();
+        s.set_transform(Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(std::f32::consts::PI/5.0));
+        let x = 2.0_f32.sqrt();
+        let n = s.normal_at(Point::new(0.0, x, -x));
+        assert!(n == Vector::new(0.0, 0.97014, -0.24254));
     }
 }
 
