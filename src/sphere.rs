@@ -1,8 +1,8 @@
-use crate::ray::Ray;
 use crate::matrix::Matrix;
 use crate::point::Point;
-use crate::vector::Vector;
+use crate::ray::Ray;
 use crate::utils::fp_equal;
+use crate::vector::Vector;
 
 #[derive(Clone, PartialEq)]
 pub struct Sphere {
@@ -25,7 +25,6 @@ impl Sphere {
     }
 
     pub fn normal_at(&self, p: Point) -> Vector {
-        // return (p - Point::new(0.0, 0.0, 0.0)).normalize()
         let object_point = self.transform().inverse() * p;
         let object_normal = object_point - Point::new(0.0, 0.0, 0.0);
         let world_normal = self.transform().inverse().transpose() * object_normal;
@@ -95,7 +94,7 @@ mod tests {
     #[test]
     fn sphere_normal_at_nonaxial() {
         let s = Sphere::new();
-        let x = 3.0_f32.sqrt()/3.0;
+        let x = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_at(Point::new(x, x, x));
         assert!(n == Vector::new(x, x, x));
     }
@@ -103,8 +102,8 @@ mod tests {
     #[test]
     fn normal_is_normalized() {
         let s = Sphere::new();
-        let x = 3.0_f32.sqrt()/3.0;
-        let n = s.normal_at(Point::new(x,x,x));
+        let x = 3.0_f32.sqrt() / 3.0;
+        let n = s.normal_at(Point::new(x, x, x));
         assert!(n == n.normalize());
     }
 
@@ -119,10 +118,11 @@ mod tests {
     #[test]
     fn computing_normal_on_transformed_sphere() {
         let mut s = Sphere::new();
-        s.set_transform(Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(std::f32::consts::PI/5.0));
+        s.set_transform(
+            Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(std::f32::consts::PI / 5.0),
+        );
         let x = 2.0_f32.sqrt();
         let n = s.normal_at(Point::new(0.0, x, -x));
         assert!(n == Vector::new(0.0, 0.97014, -0.24254));
     }
 }
-

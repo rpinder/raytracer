@@ -40,6 +40,10 @@ impl Vector {
             z: self.x * other.y - self.y * other.x,
         }
     }
+
+    pub fn reflect(&self, other: &Vector) -> Vector {
+        *self - *other * 2.0 * self.dot(other)
+    }
 }
 
 impl PartialEq for Vector {
@@ -227,5 +231,22 @@ mod tests {
         let b = Vector::new(2.0, 3.0, 4.0);
         assert!(a.cross(&b) == Vector::new(-1.0, 2.0, -1.0));
         assert!(b.cross(&a) == Vector::new(1.0, -2.0, 1.0));
+    }
+
+    #[test]
+    fn reflecting_vector_approaching_at_45() {
+        let v = Vector::new(1.0, -1.0, 0.0);
+        let n = Vector::new(0.0, 1.0, 0.0);
+        let r = v.reflect(&n);
+        assert!(r == Vector::new(1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = Vector::new(0.0, -1.0, 0.0);
+        let x = 2.0_f32.sqrt()/2.0;
+        let n = Vector::new(x, x, 0.0);
+        let r = v.reflect(&n);
+        assert!(r == Vector::new(1.0, 0.0, 0.0));
     }
 }
