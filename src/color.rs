@@ -26,6 +26,21 @@ impl Color {
     }
 }
 
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        for (i, j) in [
+            (self.red, other.red),
+            (self.green, other.green),
+            (self.blue, other.blue),
+        ] {
+            if !fp_equal(i, j) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
 impl std::ops::Add for Color {
     type Output = Color;
 

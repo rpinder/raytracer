@@ -244,7 +244,7 @@ mod tests {
     #[test]
     fn reflecting_vector_off_slanted_surface() {
         let v = Vector::new(0.0, -1.0, 0.0);
-        let x = 2.0_f32.sqrt()/2.0;
+        let x = 2.0_f32.sqrt() / 2.0;
         let n = Vector::new(x, x, 0.0);
         let r = v.reflect(&n);
         assert!(r == Vector::new(1.0, 0.0, 0.0));
