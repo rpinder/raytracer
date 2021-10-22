@@ -8,7 +8,7 @@ use crate::vector::Vector;
 #[derive(Clone, PartialEq, Debug)]
 pub struct Sphere {
     matrix: Matrix,
-    material: Material,
+    pub material: Material,
 }
 
 impl Default for Sphere {

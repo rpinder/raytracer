@@ -9,7 +9,7 @@ pub struct WorldIntersection {
 }
 
 impl WorldIntersection {
-    pub fn precompute(inter: Intersection, ray: Ray) -> WorldIntersection {
+    pub fn precompute(inter: Intersection, ray: &Ray) -> WorldIntersection {
         let point = ray.position(inter.t());
         let eye =  -ray.direction();
         let normal = inter.object().normal_at(point);
@@ -57,7 +57,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let shape = Sphere::default();
         let i = Intersection::new(4.0, shape);
-        let comps = WorldIntersection::precompute(i.clone(), r);
+        let comps = WorldIntersection::precompute(i.clone(), &r);
         assert_eq!(comps.inter().t(), i.t());
         assert_eq!(comps.point(), &Point::new(0.0, 0.0, -1.0));
         assert_eq!(comps.eye(), &Vector::new(0.0, 0.0, -1.0));
@@ -69,7 +69,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
         let shape = Sphere::default();
         let i = Intersection::new(4.0, shape);
-        let comps = WorldIntersection::precompute(i, r);
+        let comps = WorldIntersection::precompute(i, &r);
         assert!(!comps.inside())
     }
 
@@ -78,7 +78,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector::new(0.0, 0.0, 1.0));
         let shape = Sphere::default();
         let i = Intersection::new(1.0, shape);
-        let comps = WorldIntersection::precompute(i, r);
+        let comps = WorldIntersection::precompute(i, &r);
         assert!(comps.inside());
         assert_eq!(comps.point(), &Point::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye(), &Vector::new(0.0, 0.0, -1.0));

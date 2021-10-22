@@ -20,6 +20,11 @@ impl Material {
             shininess,
         }
     }
+
+    pub fn set_ambient(&mut self, new: f32) -> &Self{
+        self.ambient = new;
+        self
+    }
 }
 
 impl Default for Material {

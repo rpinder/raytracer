@@ -3,7 +3,7 @@ use crate::point::Point;
 use crate::material::Material;
 use crate::vector::Vector;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct PointLight {
     position: Point,
     intensity: Color,
