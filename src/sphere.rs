@@ -11,6 +11,15 @@ pub struct Sphere {
     material: Material,
 }
 
+impl Default for Sphere {
+    fn default() -> Sphere {
+        Sphere {
+            matrix: Matrix::identity(),
+            material: Material::default(),
+        }
+    }
+}
+
 impl Sphere {
     pub fn new() -> Sphere {
         Sphere {
