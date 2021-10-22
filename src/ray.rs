@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn ray_intersects_sphere_at_two_points() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(fp_equal(xs[0].t, 4.0));
         assert!(fp_equal(xs[1].t, 6.0));
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn ray_intersects_sphere_at_a_tangent() {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(fp_equal(xs[0].t, 5.0));
         assert!(fp_equal(xs[1].t, 5.0));
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn ray_misses_a_sphere() {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(xs.is_empty());
     }
@@ -149,7 +149,7 @@ mod tests {
     #[test]
     fn ray_originates_inside_sphere() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(fp_equal(xs[0].t, -1.0));
         assert!(fp_equal(xs[1].t, 1.0));
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn sphere_behind_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(fp_equal(xs[0].t, -6.0));
         assert!(fp_equal(xs[1].t, -4.0));
@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let s2 = s.clone();
         let i1 = Intersection::new(1.0, s);
         let i2 = Intersection::new(2.0, s2);
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn intersect_sets_the_object_on_the_intersection() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = r.intersect(&s);
         assert!(xs[0].object() == &s);
         assert!(xs[1].object() == &s);
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_positive_t() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let s2 = s.clone();
         let i1 = Intersection::new(1.0, s);
         let i1c = i1.clone();
@@ -199,7 +199,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_negative_t() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let s2 = s.clone();
         let i1 = Intersection::new(-1.0, s);
         let i2 = Intersection::new(1.0, s2);
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_negative_t() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let s2 = s.clone();
         let i1 = Intersection::new(-2.0, s);
         let i2 = Intersection::new(-1.0, s2);
@@ -222,7 +222,7 @@ mod tests {
 
     #[test]
     fn hit_is_always_lowest_nonnegative_intersection() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let s2 = s.clone();
         let s3 = s.clone();
         let s4 = s.clone();

@@ -19,7 +19,7 @@ fn main() {
     let half = wall_size as f32 / 2.0;
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let mut shape = Sphere::new();
+    let mut shape = Sphere::default();
     let mut mat = Material::default();
     mat.color = Color::new(1.0, 0.2, 1.0);
     shape.set_material(mat);
