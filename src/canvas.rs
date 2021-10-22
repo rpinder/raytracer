@@ -52,9 +52,15 @@ impl Canvas {
                 newline.push_str(&new);
             }
             if newline.len() > 70 {
-                let pos = newline[0..70].rfind(' ').unwrap();
-                newline.replace_range(pos..(pos + 1), "\n");
+                let mut start = 0;
+                for _ in 0..(newline.len()/70) {
+                    let pos = newline[start..(start+71)].rfind(' ').unwrap();
+                    newline.replace_range((start + pos)..(start + pos + 1), "\n");
+                    start = start + pos;
+                }
             }
+
+                
             str.push_str(&newline);
             str.pop();
             str.push_str(&"\n")

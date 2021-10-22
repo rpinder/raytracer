@@ -1,7 +1,7 @@
 use crate::utils::fp_equal;
 use crate::vector::Vector;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -49,7 +49,7 @@ impl std::ops::Add<Vector> for Point {
     type Output = Self;
 
     fn add(self, other: Vector) -> Self {
-        Self::new(self.x + other.x, self.y - other.y, self.z - other.z)
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 }
 

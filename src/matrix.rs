@@ -3,7 +3,7 @@ use crate::utils::fp_equal;
 use crate::vector::Vector;
 use std::convert::TryInto;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matrix {
     row: u32,
     col: u32,

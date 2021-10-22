@@ -5,7 +5,7 @@ use crate::ray::Ray;
 use crate::utils::fp_equal;
 use crate::vector::Vector;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Sphere {
     matrix: Matrix,
     material: Material,

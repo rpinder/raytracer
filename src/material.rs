@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::utils::fp_equal;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Material {
     pub color: Color,
     pub ambient: f32,
@@ -18,6 +18,16 @@ impl Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+        }
+    }
+
+    pub fn other() -> Material {
+        Material {
+            color: Color::new(1.0, 0.2, 1.0),
+            specular: 0.2,
+            diffuse: 0.7,
+            shininess: 30.0,
+            ambient: 0.1,
         }
     }
 }
@@ -45,6 +55,7 @@ impl PartialEq for Material {
 mod tests {
     use super::*;
 
+    #[test]
     fn default_material() {
         let m = Material::default();
         assert!(m.color == Color::new(1.0, 1.0, 1.0));

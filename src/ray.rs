@@ -4,6 +4,7 @@ use crate::sphere::Sphere;
 use crate::utils::fp_equal;
 use crate::vector::Vector;
 
+#[derive(Debug)]
 pub struct Ray {
     origin: Point,
     direction: Vector,
@@ -53,7 +54,7 @@ impl Ray {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Intersection {
     t: f32,
     object: Sphere,
