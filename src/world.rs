@@ -1,4 +1,4 @@
-use crate::{color::Color, material::Material, matrix::Matrix, point::Point, point_light::PointLight, sphere::Sphere};
+use crate::{color::Color, material::Material, matrix::Matrix, point::Point, point_light::PointLight, ray::{Intersection, Ray}, sphere::Sphere};
 
 pub struct World {
     objects: Vec<Sphere>,
@@ -19,6 +19,12 @@ impl World {
 
     pub fn lights(&self) -> &Vec<PointLight> {
         &self.lights
+    }
+
+    pub fn intersect_world(&self, ray: &Ray) -> Vec<Intersection> {
+        let mut inters: Vec<Intersection> = self.objects().iter().map(|x| ray.intersect(&x)).flatten().collect();
+        inters.sort_by(|a, b| a.t().partial_cmp(&b.t()).unwrap());
+        inters
     }
 }
 
@@ -42,6 +48,8 @@ impl Default for World {
 
 #[cfg(test)]
 mod tests {
+    use crate::{ray::Ray, vector::Vector};
+
     use super::*;
 
     #[test]
@@ -63,5 +71,18 @@ mod tests {
         assert!(w.lights().contains(&light));
         assert!(w.objects().contains(&s1));
         assert!(w.objects().contains(&s2));
+    }
+
+    #[test]
+    fn intersect_world_with_ray() {
+        let w = World::default();
+        let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+        let xs = w.intersect_world(&r);
+
+        assert!(xs.len() == 4);
+        assert_eq!(xs[0].t(), 4.0);
+        assert_eq!(xs[1].t(), 4.5);
+        assert_eq!(xs[2].t(), 5.5);
+        assert_eq!(xs[3].t(), 6.0);
     }
 }
