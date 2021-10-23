@@ -1,8 +1,6 @@
 use crate::material::Material;
 use crate::matrix::Matrix;
 use crate::point::Point;
-use crate::ray::Ray;
-use crate::utils::fp_equal;
 use crate::vector::Vector;
 
 #[derive(Clone, PartialEq, Debug)]
@@ -54,6 +52,8 @@ impl Sphere {
 
 #[cfg(test)]
 mod tests {
+    use crate::ray::Ray;
+    use crate::utils::fp_equal;
     use super::*;
 
     #[test]

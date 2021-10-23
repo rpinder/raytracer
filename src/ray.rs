@@ -80,10 +80,6 @@ impl PartialEq for Intersection {
     }
 }
 
-fn intersections(inters: &[Intersection]) -> Vec<Intersection> {
-    inters.to_vec()
-}
-
 pub fn hit(intersections: Vec<Intersection>) -> Option<Intersection> {
     let above_zero = intersections.iter().filter(|x| x.t() > 0.0);
     let mut current = std::f32::MAX;
@@ -101,6 +97,10 @@ pub fn hit(intersections: Vec<Intersection>) -> Option<Intersection> {
 mod tests {
     use super::*;
     use crate::utils::fp_equal;
+
+    fn intersections(inters: &[Intersection]) -> Vec<Intersection> {
+        inters.to_vec()
+    }
 
     #[test]
     fn creating_and_querying_a_ray() {

@@ -1,5 +1,4 @@
 use crate::color::Color;
-use crate::utils::fp_equal;
 
 #[derive(Clone, Debug)]
 pub struct Material {
@@ -81,6 +80,7 @@ impl PartialEq for Material {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::fp_equal;
     use super::*;
 
     #[test]
