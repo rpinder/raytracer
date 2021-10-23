@@ -79,7 +79,7 @@ impl Matrix {
             _ => {
                 let mut det = 0.0;
                 for i in 0..self.col {
-                    det = det + self.get(0, i) * self.cofactor(0, i)
+                    det += self.get(0, i) * self.cofactor(0, i)
                 }
                 det
             }
@@ -97,7 +97,7 @@ impl Matrix {
                 continue;
             }
             m.grid[index] = *val;
-            index = index + 1;
+            index += 1;
         }
         m
     }
@@ -197,6 +197,7 @@ impl Matrix {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<Matrix> for Matrix {
     type Output = Self;
     fn mul(self, other: Matrix) -> Matrix {
@@ -214,6 +215,7 @@ impl std::ops::Mul<Matrix> for Matrix {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<&Matrix> for &Matrix {
     type Output = Matrix;
     fn mul(self, other: &Matrix) -> Matrix {
@@ -231,17 +233,18 @@ impl std::ops::Mul<&Matrix> for &Matrix {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<Point> for Matrix {
     type Output = Point;
     fn mul(self, other: Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| {
-                return self.get(x, 0) * other.x
+            .map(|x| 
+                self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
-                    + self.get(x, 3) * 1.0;
-            })
+                    + self.get(x, 3) * 1.0
+            )
             .collect();
         Point {
             x: vals[0],
@@ -251,17 +254,18 @@ impl std::ops::Mul<Point> for Matrix {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<&Point> for &Matrix {
     type Output = Point;
     fn mul(self, other: &Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| {
-                return self.get(x, 0) * other.x
+            .map(|x| 
+                self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
-                    + self.get(x, 3) * 1.0;
-            })
+                    + self.get(x, 3) * 1.0
+            )
             .collect();
         Point {
             x: vals[0],
@@ -271,16 +275,18 @@ impl std::ops::Mul<&Point> for &Matrix {
     }
 }
 
+
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<Vector> for Matrix {
     type Output = Vector;
     fn mul(self, other: Vector) -> Vector {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| {
-                return self.get(x, 0) * other.x
+            .map(|x|
+                self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
-                    + self.get(x, 2) * other.z;
-            })
+                    + self.get(x, 2) * other.z
+            )
             .collect();
         Vector {
             x: vals[0],
@@ -290,16 +296,17 @@ impl std::ops::Mul<Vector> for Matrix {
     }
 }
 
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<&Vector> for &Matrix {
     type Output = Vector;
     fn mul(self, other: &Vector) -> Vector {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| {
-                return self.get(x, 0) * other.x
+            .map(|x|
+                self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
-                    + self.get(x, 2) * other.z;
-            })
+                    + self.get(x, 2) * other.z
+            )
             .collect();
         Vector {
             x: vals[0],

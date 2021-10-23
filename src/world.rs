@@ -22,7 +22,7 @@ impl World {
     }
 
     pub fn intersect_world(&self, ray: &Ray) -> Vec<Intersection> {
-        let mut inters: Vec<Intersection> = self.objects().iter().map(|x| ray.intersect(&x)).flatten().collect();
+        let mut inters: Vec<Intersection> = self.objects().iter().map(|x| ray.intersect(x)).flatten().collect();
         inters.sort_by(|a, b| a.t().partial_cmp(&b.t()).unwrap());
         inters
     }

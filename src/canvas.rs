@@ -56,14 +56,13 @@ impl Canvas {
                 for _ in 0..(newline.len()/70) {
                     let pos = newline[start..(start+71)].rfind(' ').unwrap();
                     newline.replace_range((start + pos)..(start + pos + 1), "\n");
-                    start = start + pos;
+                    start += pos;
                 }
             }
 
-                
             str.push_str(&newline);
             str.pop();
-            str.push_str(&"\n")
+            str.push('\n')
         }
         str
     }
