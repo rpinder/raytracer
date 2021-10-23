@@ -37,7 +37,7 @@ fn main() {
                 * Matrix::rotation_x(std::f32::consts::PI / 2.0)
                 * Matrix::scaling(10.0, 0.01, 10.0),
         )
-        .set_material(floormaterial.clone());
+        .set_material(floormaterial);
 
     let middle = Sphere::default()
         .set_transform(Matrix::translation(-0.5, 1.0, 0.5))

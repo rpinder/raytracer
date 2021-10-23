@@ -39,11 +39,13 @@ impl World {
     }
 
     pub fn shade_hit(&self, comps: &WorldIntersection) -> Color {
+        let shadowed = self.is_shadowed(*comps.over_point());
         self.light.lighting(
             comps.inter().object().material(),
             *comps.point(),
             *comps.eye(),
             *comps.normal(),
+            shadowed
         )
     }
 
@@ -52,6 +54,21 @@ impl World {
         match hit(inters) {
             Some(int) => self.shade_hit(&WorldIntersection::precompute(int, ray)),
             None => Color::new(0.0, 0.0, 0.0),
+        }
+    }
+
+    pub fn is_shadowed(&self, point: Point) -> bool {
+        let v = self.light.position() - point;
+        let distance = v.magnitude();
+        let direction = v.normalize();
+
+        let r = Ray::new(point, direction);
+        let intersections = self.intersect_world(&r);
+
+        if let Some(h) = hit(intersections) {
+            h.t() < distance
+        } else {
+            false   
         }
     }
 }
@@ -164,5 +181,46 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector::new(0.0, 0.0, -1.0));
         let c = w2.color_at(&r);
         assert_eq!(c, inner.material().color)
+    }
+
+    #[test]
+    fn no_shadow_when_nothing_colinear() {
+        let w = World::default();
+        let p = Point::new(0.0, 10.0, 0.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn shadow_when_object_between() {
+        let w = World::default();
+        let p = Point::new(10.0, -10.0, 10.0);
+        assert!(w.is_shadowed(p));
+    }
+
+    #[test]
+    fn no_shadow_object_behind_light() {
+        let w = World::default();
+        let p = Point::new(-20.0, 20.0, -20.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn no_shadow_object_behind_point() {
+        let w = World::default();
+        let p = Point::new(-2.0, 2.0, -2.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn shade_hit_given_intersection_in_shadow() {
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let s1 = Sphere::default();
+        let s2 = Sphere::default().set_transform(Matrix::translation(0.0, 0.0, 10.0));
+        let w = World::new(vec![s1, s2.clone()], light);
+        let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector::new(0.0, 0.0, 1.0));
+        let i = Intersection::new(4.0, s2);
+        let comps = WorldIntersection::precompute(i, &r);
+        let c = w.shade_hit(&comps);
+        assert_eq!(c, Color::new(0.1, 0.1, 0.1));
     }
 }

@@ -25,7 +25,7 @@ impl PointLight {
         self.intensity
     }
 
-    pub fn lighting(&self, mat: &Material, pos: Point, eye: Vector, normal: Vector) -> Color {
+    pub fn lighting(&self, mat: &Material, pos: Point, eye: Vector, normal: Vector, in_shadow: bool) -> Color {
         let effective_color = mat.color * self.intensity;
         let lightv = (self.position - pos).normalize();
         let ambient = effective_color * mat.ambient;
@@ -46,7 +46,11 @@ impl PointLight {
                 (diff, specular)
             }
         };
-        ambient + diffuse + specular
+        if in_shadow {
+            ambient
+        } else {
+            ambient + diffuse + specular
+        }
     }
 }
 
@@ -71,7 +75,7 @@ mod tests {
         let eye = Vector::new(0.0, 0.0, -1.0);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = light.lighting(&m, position, eye, normal);
+        let result = light.lighting(&m, position, eye, normal, false);
         assert!(result == Color::new(1.9, 1.9, 1.9));
     }
 
@@ -84,7 +88,7 @@ mod tests {
         let eye = Vector::new(0.0, x, -x);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = light.lighting(&m, position, eye, normal);
+        let result = light.lighting(&m, position, eye, normal, false);
         assert!(result == Color::new(1.0, 1.0, 1.0));
     }
 
@@ -96,7 +100,7 @@ mod tests {
         let eye = Vector::new(0.0, 0.0, -1.0);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = light.lighting(&m, position, eye, normal);
+        let result = light.lighting(&m, position, eye, normal, false);
         assert!(result == Color::new(0.7364, 0.7364, 0.7364));
     }
 
@@ -109,7 +113,7 @@ mod tests {
         let eye = Vector::new(0.0, -x, -x);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = light.lighting(&m, position, eye, normal);
+        let result = light.lighting(&m, position, eye, normal, false);
         assert!(result == Color::new(1.63639, 1.63639, 1.63639));
     }
 
@@ -121,7 +125,21 @@ mod tests {
         let eye = Vector::new(0.0, 0.0, -1.0);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
-        let result = light.lighting(&m, position, eye, normal);
+        let result = light.lighting(&m, position, eye, normal, false);
         assert!(result == Color::new(0.1, 0.1, 0.1));
     }
+
+    #[test]
+    fn lighting_with_surface_in_shadow() {
+        let m = Material::default();
+        let position = Point::new(0.0, 0.0, 0.0);
+
+        let eye = Vector::new(0.0, 0.0, -1.0);
+        let normal = Vector::new(0.0, 0.0, -1.0);
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let in_shadow = true;
+        let result = light.lighting(&m, position, eye, normal, in_shadow);
+        assert!(result == Color::new(0.1, 0.1, 0.1));
+    }
+
 }
