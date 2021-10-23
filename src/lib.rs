@@ -10,3 +10,4 @@ pub mod utils;
 pub mod vector;
 pub mod world;
 pub mod world_intersection;
+pub mod camera;
