@@ -1,4 +1,4 @@
 # raytracer
-early days
+early days, first rust project
 
 ![](output.jpg)
