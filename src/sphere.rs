@@ -20,10 +20,7 @@ impl Default for Sphere {
 
 impl Sphere {
     pub fn new(matrix: Matrix, material: Material) -> Sphere {
-        Sphere {
-            matrix,
-            material,
-        }
+        Sphere { matrix, material }
     }
 
     pub fn transform(&self) -> &Matrix {
@@ -54,9 +51,9 @@ impl Sphere {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::ray::Ray;
     use crate::utils::fp_equal;
-    use super::*;
 
     #[test]
     fn sphere_default_implementation() {
@@ -135,7 +132,9 @@ mod tests {
 
     #[test]
     fn computing_normal_on_transformed_sphere() {
-        let s = Sphere::default().set_transform(Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(std::f32::consts::PI / 5.0));
+        let s = Sphere::default().set_transform(
+            Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(std::f32::consts::PI / 5.0),
+        );
         let x = 2.0_f32.sqrt();
         let n = s.normal_at(Point::new(0.0, x, -x));
         assert!(n == Vector::new(0.0, 0.97014, -0.24254));
@@ -145,7 +144,7 @@ mod tests {
     fn sphere_has_default_material() {
         let s = Sphere::default();
         let m = s.material;
-        assert!(m == Material::default()); 
+        assert!(m == Material::default());
     }
 
     #[test]

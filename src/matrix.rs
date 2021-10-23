@@ -191,7 +191,7 @@ impl Matrix {
             &[left.x, left.y, left.z, 0.0],
             &[true_up.x, true_up.y, true_up.z, 0.0],
             &[-forward.x, -forward.y, -forward.z, 0.0],
-            &[0.0, 0.0, 0.0, 1.0]
+            &[0.0, 0.0, 0.0, 1.0],
         ]);
         orientation * Matrix::translation(-from.x, -from.y, -from.z)
     }
@@ -239,12 +239,12 @@ impl std::ops::Mul<Point> for Matrix {
     fn mul(self, other: Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| 
+            .map(|x| {
                 self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
                     + self.get(x, 3) * 1.0
-            )
+            })
             .collect();
         Point {
             x: vals[0],
@@ -260,12 +260,12 @@ impl std::ops::Mul<&Point> for &Matrix {
     fn mul(self, other: &Point) -> Point {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x| 
+            .map(|x| {
                 self.get(x, 0) * other.x
                     + self.get(x, 1) * other.y
                     + self.get(x, 2) * other.z
                     + self.get(x, 3) * 1.0
-            )
+            })
             .collect();
         Point {
             x: vals[0],
@@ -275,18 +275,13 @@ impl std::ops::Mul<&Point> for &Matrix {
     }
 }
 
-
 #[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Mul<Vector> for Matrix {
     type Output = Vector;
     fn mul(self, other: Vector) -> Vector {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x|
-                self.get(x, 0) * other.x
-                    + self.get(x, 1) * other.y
-                    + self.get(x, 2) * other.z
-            )
+            .map(|x| self.get(x, 0) * other.x + self.get(x, 1) * other.y + self.get(x, 2) * other.z)
             .collect();
         Vector {
             x: vals[0],
@@ -302,11 +297,7 @@ impl std::ops::Mul<&Vector> for &Matrix {
     fn mul(self, other: &Vector) -> Vector {
         let vals: Vec<f32> = vec![0, 1, 2, 3]
             .into_iter()
-            .map(|x|
-                self.get(x, 0) * other.x
-                    + self.get(x, 1) * other.y
-                    + self.get(x, 2) * other.z
-            )
+            .map(|x| self.get(x, 0) * other.x + self.get(x, 1) * other.y + self.get(x, 2) * other.z)
             .collect();
         Vector {
             x: vals[0],
@@ -838,7 +829,7 @@ mod tests {
             &[-0.50709, 0.50709, 0.67612, -2.36643],
             &[0.76772, 0.60609, 0.12122, -2.82843],
             &[-0.35857, 0.59761, -0.71714, 0.0],
-            &[0.0, 0.0, 0.0, 1.0]
+            &[0.0, 0.0, 0.0, 1.0],
         ]);
         assert_eq!(t, exp);
     }

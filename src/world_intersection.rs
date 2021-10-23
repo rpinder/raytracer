@@ -1,4 +1,8 @@
-use crate::{point::Point, ray::{Intersection, Ray}, vector::Vector};
+use crate::{
+    point::Point,
+    ray::{Intersection, Ray},
+    vector::Vector,
+};
 
 pub struct WorldIntersection {
     inter: Intersection,
@@ -11,15 +15,15 @@ pub struct WorldIntersection {
 impl WorldIntersection {
     pub fn precompute(inter: Intersection, ray: &Ray) -> WorldIntersection {
         let point = ray.position(inter.t());
-        let eye =  -ray.direction();
+        let eye = -ray.direction();
         let normal = inter.object().normal_at(point);
         let inside = normal.dot(&eye) < 0.0;
         WorldIntersection {
             point,
             eye,
-            normal: if inside {-normal} else {normal},
+            normal: if inside { -normal } else { normal },
             inter,
-            inside, 
+            inside,
         }
     }
 
@@ -44,11 +48,14 @@ impl WorldIntersection {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
-    use crate::{point::Point, ray::{Intersection, Ray}, sphere::Sphere, vector::Vector};
+    use crate::{
+        point::Point,
+        ray::{Intersection, Ray},
+        sphere::Sphere,
+        vector::Vector,
+    };
 
     use super::*;
 

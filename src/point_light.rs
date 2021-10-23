@@ -1,6 +1,6 @@
 use crate::color::Color;
-use crate::point::Point;
 use crate::material::Material;
+use crate::point::Point;
 use crate::vector::Vector;
 
 #[derive(PartialEq, Clone)]
@@ -80,7 +80,7 @@ mod tests {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
 
-        let x = 2.0_f32.sqrt()/2.0;
+        let x = 2.0_f32.sqrt() / 2.0;
         let eye = Vector::new(0.0, x, -x);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
@@ -105,7 +105,7 @@ mod tests {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
 
-        let x = 2.0_f32.sqrt()/2.0;
+        let x = 2.0_f32.sqrt() / 2.0;
         let eye = Vector::new(0.0, -x, -x);
         let normal = Vector::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));

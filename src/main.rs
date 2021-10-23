@@ -1,47 +1,82 @@
-use raytracer::canvas::*;
+use raytracer::camera::Camera;
 use raytracer::color::*;
-use raytracer::point::*;
-use raytracer::ray::*;
-use raytracer::sphere::*;
 use raytracer::material::*;
+use raytracer::matrix::*;
+use raytracer::point::*;
 use raytracer::point_light::*;
+use raytracer::sphere::*;
+use raytracer::vector::Vector;
+use raytracer::world::World;
 
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
 fn main() {
-    let ray_origin = Point::new(0.0, 0.0, -5.0);
-    let wall_z = 10;
-    let wall_size = 7;
-    let canvas_pixels = 500;
-    let pixel_size = wall_size as f32 / canvas_pixels as f32;
-    let half = wall_size as f32 / 2.0;
+    let floormaterial = Material::default()
+        .set_color(Color::new(1.0, 0.9, 0.9))
+        .set_specular(0.0);
 
-    let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let mat = Material::default().set_color(Color::new(1.0, 0.2, 1.0));
-    let shape = Sphere::default().set_material(mat);
+    let floor = Sphere::default()
+        .set_transform(Matrix::scaling(10.0, 0.01, 10.0))
+        .set_material(floormaterial.clone());
+
+    let left_wall = Sphere::default()
+        .set_transform(
+            Matrix::translation(0.0, 0.0, 5.0)
+                * Matrix::rotation_y(-std::f32::consts::PI / 4.0)
+                * Matrix::rotation_x(std::f32::consts::PI / 2.0)
+                * Matrix::scaling(10.0, 0.01, 10.0),
+        )
+        .set_material(floormaterial.clone());
+
+    let right_wall = Sphere::default()
+        .set_transform(
+            Matrix::translation(0.0, 0.0, 5.0)
+                * Matrix::rotation_y(std::f32::consts::PI / 4.0)
+                * Matrix::rotation_x(std::f32::consts::PI / 2.0)
+                * Matrix::scaling(10.0, 0.01, 10.0),
+        )
+        .set_material(floormaterial.clone());
+
+    let middle = Sphere::default()
+        .set_transform(Matrix::translation(-0.5, 1.0, 0.5))
+        .set_material(
+            Material::default()
+                .set_color(Color::new(0.1, 1.0, 0.5))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        );
+
+    let right = Sphere::default()
+        .set_transform(Matrix::translation(1.5, 0.5, -0.5) * Matrix::scaling(0.5, 0.5, 0.5))
+        .set_material(
+            Material::default()
+                .set_color(Color::new(0.5, 1.0, 0.1))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        );
+
+    let left = Sphere::default()
+        .set_transform(Matrix::translation(-1.5, 0.33, -0.75) * Matrix::scaling(0.33, 0.33, 0.33))
+        .set_material(
+            Material::default()
+                .set_color(Color::new(1.0, 0.8, 0.1))
+                .set_diffuse(0.7)
+                .set_specular(0.3),
+        );
 
     let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-    for y in 0..canvas_pixels {
-        println!("{}", y);
-        let world_y = half - pixel_size * y as f32;
-        for x in 0..canvas_pixels {
-            let world_x = -half + pixel_size * x as f32;
-            let position = Point::new(world_x, world_y, wall_z as f32);
-            let r = Ray::new(ray_origin, (position - ray_origin).normalize());
-            let xs = r.intersect(&shape);
+    let camera = Camera::new(500, 500, std::f32::consts::PI / 3.0)
+        .set_transform(Matrix::view_transform(
+            Point::new(0.0, 1.5, -5.0),
+            Point::new(0.0, 1.0, 0.0),
+            Vector::new(0.0, 1.0, 0.0),
+        ));
 
-            if let Some(hit) = hit(xs) {
-                let point = r.position(hit.t());
-                let normal = hit.object().normal_at(point);
-                let eye = -r.direction();
-                let color = light.lighting(hit.object().material(), point, eye, normal);
-                canvas.write_pixel(x as usize, y as usize, color);
-            }
-        }
-    }
+    let world = World::new(vec![floor, left_wall, right_wall, middle, right, left], light);
+    let canvas = camera.render(world);
 
     let path = Path::new("output.ppm");
     let mut file = match File::create(&path) {

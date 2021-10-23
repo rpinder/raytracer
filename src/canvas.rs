@@ -53,8 +53,8 @@ impl Canvas {
             }
             if newline.len() > 70 {
                 let mut start = 0;
-                for _ in 0..(newline.len()/70) {
-                    let pos = newline[start..(start+71)].rfind(' ').unwrap();
+                for _ in 0..(newline.len() / 70) {
+                    let pos = newline[start..(start + 71)].rfind(' ').unwrap();
                     newline.replace_range((start + pos)..(start + pos + 1), "\n");
                     start += pos;
                 }

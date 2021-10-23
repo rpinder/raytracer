@@ -1,6 +1,8 @@
+use crate::canvas::Canvas;
 use crate::matrix::Matrix;
-use crate::ray::Ray;
 use crate::point::Point;
+use crate::ray::Ray;
+use crate::world::World;
 
 pub struct Camera {
     hsize: u32,
@@ -14,7 +16,7 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(hsize: u32, vsize: u32, field_of_view: f32) -> Camera {
-        let half_view = (field_of_view/2.0).tan();
+        let half_view = (field_of_view / 2.0).tan();
         let aspect = hsize as f32 / vsize as f32;
 
         let (half_width, half_height) = if aspect >= 1.0 {
@@ -24,7 +26,7 @@ impl Camera {
         };
 
         let pixel_size = (half_width * 2.0) / hsize as f32;
-        
+
         Camera {
             hsize,
             vsize,
@@ -48,6 +50,17 @@ impl Camera {
         let direction = (pixel - origin).normalize();
 
         Ray::new(origin, direction)
+    }
+
+    pub fn render(&self, world: World) -> Canvas {
+        let mut image = Canvas::new(self.hsize, self.vsize);
+        for y in 0..(self.vsize - 1) {
+            for x in 0..(self.hsize - 1) {
+                let ray = self.ray_for_pixel(x, y);
+                image.write_pixel(x as usize, y as usize, world.color_at(&ray));
+            }
+        }
+        image
     }
 
     pub fn hsize(&self) -> u32 {
@@ -78,8 +91,9 @@ impl Camera {
 
 #[cfg(test)]
 mod tests {
-    use crate::vector::Vector;
     use super::*;
+    use crate::color::Color;
+    use crate::vector::Vector;
 
     #[test]
     fn constructing_a_camera() {
@@ -108,7 +122,7 @@ mod tests {
     #[test]
     fn constructing_ray_through_center_canvas() {
         let c = Camera::new(201, 101, std::f32::consts::PI / 2.0);
-        let r = c.ray_for_pixel(100,50);
+        let r = c.ray_for_pixel(100, 50);
         assert_eq!(r.origin(), Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction(), Vector::new(0.0, 0.0, -1.0));
     }
@@ -116,17 +130,31 @@ mod tests {
     #[test]
     fn constructing_ray_through_corner_canvas() {
         let c = Camera::new(201, 101, std::f32::consts::PI / 2.0);
-        let r = c.ray_for_pixel(0,0);
+        let r = c.ray_for_pixel(0, 0);
         assert_eq!(r.origin(), Point::new(0.0, 0.0, 0.0));
         assert_eq!(r.direction(), Vector::new(0.66519, 0.33259, -0.66851));
     }
 
     #[test]
     fn constructing_ray_transformed_camera() {
-        let c = Camera::new(201, 101, std::f32::consts::PI / 2.0).set_transform(Matrix::rotation_y(std::f32::consts::PI / 4.0) * Matrix::translation(0.0, -2.0, 5.0));
-        let r = c.ray_for_pixel(100,50);
+        let c = Camera::new(201, 101, std::f32::consts::PI / 2.0).set_transform(
+            Matrix::rotation_y(std::f32::consts::PI / 4.0) * Matrix::translation(0.0, -2.0, 5.0),
+        );
+        let r = c.ray_for_pixel(100, 50);
         assert_eq!(r.origin(), Point::new(0.0, 2.0, -5.0));
         let trt = 2.0_f32.sqrt() / 2.0;
         assert_eq!(r.direction(), Vector::new(trt, 0.0, -trt));
+    }
+
+    #[test]
+    fn rendering_world_with_camera() {
+        let w = World::default();
+        let from = Point::new(0.0, 0.0, -5.0);
+        let to = Point::new(0.0, 0.0, 0.0);
+        let up = Vector::new(0.0, 1.0, 0.0);
+        let c = Camera::new(11, 11, std::f32::consts::PI / 2.0)
+            .set_transform(Matrix::view_transform(from, to, up));
+        let image = c.render(w);
+        assert_eq!(image.pixel_at(5, 5), Color::new(0.38066, 0.47583, 0.2855));
     }
 }

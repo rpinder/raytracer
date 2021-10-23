@@ -10,7 +10,13 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new(color: Color, ambient: f32, diffuse: f32, specular: f32, shininess: f32) -> Material {
+    pub fn new(
+        color: Color,
+        ambient: f32,
+        diffuse: f32,
+        specular: f32,
+        shininess: f32,
+    ) -> Material {
         Material {
             color,
             ambient,
@@ -44,7 +50,6 @@ impl Material {
         self.shininess = new;
         self
     }
-
 }
 
 impl Default for Material {
@@ -80,8 +85,8 @@ impl PartialEq for Material {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::fp_equal;
     use super::*;
+    use crate::utils::fp_equal;
 
     #[test]
     fn default_material() {

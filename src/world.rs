@@ -1,4 +1,13 @@
-use crate::{color::Color, material::Material, matrix::Matrix, point::Point, point_light::PointLight, ray::{Intersection, Ray, hit}, sphere::Sphere, world_intersection::WorldIntersection};
+use crate::{
+    color::Color,
+    material::Material,
+    matrix::Matrix,
+    point::Point,
+    point_light::PointLight,
+    ray::{hit, Intersection, Ray},
+    sphere::Sphere,
+    world_intersection::WorldIntersection,
+};
 
 pub struct World {
     objects: Vec<Sphere>,
@@ -7,10 +16,7 @@ pub struct World {
 
 impl World {
     pub fn new(objects: Vec<Sphere>, light: PointLight) -> World {
-        World {
-            objects,
-            light,
-        }
+        World { objects, light }
     }
 
     pub fn objects(&self) -> &Vec<Sphere> {
@@ -22,13 +28,23 @@ impl World {
     }
 
     pub fn intersect_world(&self, ray: &Ray) -> Vec<Intersection> {
-        let mut inters: Vec<Intersection> = self.objects().iter().map(|x| ray.intersect(x)).flatten().collect();
+        let mut inters: Vec<Intersection> = self
+            .objects()
+            .iter()
+            .map(|x| ray.intersect(x))
+            .flatten()
+            .collect();
         inters.sort_by(|a, b| a.t().partial_cmp(&b.t()).unwrap());
         inters
     }
 
     pub fn shade_hit(&self, comps: &WorldIntersection) -> Color {
-        self.light.lighting(comps.inter().object().material(), *comps.point(), *comps.eye(), *comps.normal())
+        self.light.lighting(
+            comps.inter().object().material(),
+            *comps.point(),
+            *comps.eye(),
+            *comps.normal(),
+        )
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
@@ -37,7 +53,6 @@ impl World {
             Some(int) => self.shade_hit(&WorldIntersection::precompute(int, ray)),
             None => Color::new(0.0, 0.0, 0.0),
         }
-
     }
 }
 
@@ -45,7 +60,10 @@ impl Default for World {
     fn default() -> World {
         let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let mat = Material::default().set_color(Color::new(0.8, 1.0, 0.6)).set_diffuse(0.7).set_specular(0.2);
+        let mat = Material::default()
+            .set_color(Color::new(0.8, 1.0, 0.6))
+            .set_diffuse(0.7)
+            .set_specular(0.2);
         let s1 = Sphere::default().set_material(mat);
 
         let s2 = Sphere::default().set_transform(Matrix::scaling(0.5, 0.5, 0.5));
@@ -64,7 +82,10 @@ mod tests {
     fn creating_a_world() {
         let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let mat = Material::default().set_color(Color::new(0.8, 1.0, 0.6)).set_diffuse(0.7).set_specular(0.2);
+        let mat = Material::default()
+            .set_color(Color::new(0.8, 1.0, 0.6))
+            .set_diffuse(0.7)
+            .set_specular(0.2);
         let s1 = Sphere::default().set_material(mat);
 
         let s2 = Sphere::default().set_transform(Matrix::scaling(0.5, 0.5, 0.5));
