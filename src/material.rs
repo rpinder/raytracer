@@ -21,10 +21,31 @@ impl Material {
         }
     }
 
-    pub fn set_ambient(&mut self, new: f32) -> &Self{
+    pub fn set_color(mut self, new: Color) -> Self {
+        self.color = new;
+        self
+    }
+
+    pub fn set_ambient(mut self, new: f32) -> Self {
         self.ambient = new;
         self
     }
+
+    pub fn set_diffuse(mut self, new: f32) -> Self {
+        self.diffuse = new;
+        self
+    }
+
+    pub fn set_specular(mut self, new: f32) -> Self {
+        self.specular = new;
+        self
+    }
+
+    pub fn set_shininess(mut self, new: f32) -> Self {
+        self.shininess = new;
+        self
+    }
+
 }
 
 impl Default for Material {

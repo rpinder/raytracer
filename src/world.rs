@@ -46,10 +46,7 @@ impl Default for World {
         let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
         let mut s1 = Sphere::default();
-        let mut mat = Material::default();
-        mat.color = Color::new(0.8, 1.0, 0.6);
-        mat.diffuse = 0.7;
-        mat.specular = 0.2;
+        let mat = Material::default().set_color(Color::new(0.8, 1.0, 0.6)).set_diffuse(0.7).set_specular(0.2);
         s1.set_material(mat);
 
         let mut s2 = Sphere::default();
